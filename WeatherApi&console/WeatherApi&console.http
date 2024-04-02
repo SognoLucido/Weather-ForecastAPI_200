@@ -1,0 +1,6 @@
+@WeatherApi_console_HostAddress = http://localhost:5223
+
+GET {{WeatherApi_console_HostAddress}}/weatherforecast/Hello
+
+
+###
