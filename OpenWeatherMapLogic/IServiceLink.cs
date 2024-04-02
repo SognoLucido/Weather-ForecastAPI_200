@@ -1,7 +1,5 @@
 ﻿using OpenWeatherMapLogic.JsonModelApi;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+
 
 
 namespace OpenWeatherMapLogic
@@ -17,7 +15,7 @@ namespace OpenWeatherMapLogic
 
         Task<List<ApiModels.City>?> GetCityInformation();
 
-        Task<CustomWeathermodel> GetCityWeather(double? Latitude, double? Longitude);
+        Task<CustomWeathermodel?> GetCityWeather(double? Latitude, double? Longitude);
 
        // Task<string> GetStringAsync(string url);
 
