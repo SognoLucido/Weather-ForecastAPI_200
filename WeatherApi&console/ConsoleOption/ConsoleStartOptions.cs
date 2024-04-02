@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OpenWeatherMapLogic;
 using System.Diagnostics.Eventing.Reader;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace WeatherApi_console.ConsoleOption
@@ -19,10 +20,46 @@ namespace WeatherApi_console.ConsoleOption
         public async Task<bool> ConsoleStart()
         {
 
-            Console.Write("Choose One : Console Weather OneShot(1), APi Weather server(2), Both(3) : ");
 
-           if( int.TryParse(Console.ReadLine(), out int result)) { }
-               else { return true; }
+            int result = 0;
+
+            while(true){ 
+                Console.Write("Choose One : Console Weather OneShot(1), APi Weather server(2), Both(3) : ");
+
+              string input = Console.ReadLine();
+
+                if (String.IsNullOrEmpty(input))
+                {
+                    Console.WriteLine("Invalid Input");
+                    continue;
+                }
+                else
+                {
+                    if (int.TryParse(input, out result))
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid Input");
+                        continue;
+                    }
+                }
+  
+            }
+
+
+
+
+
+            // Console.Write("Choose One : Console Weather OneShot(1), APi Weather server(2), Both(3) : ");
+
+            //if( int.TryParse(Console.ReadLine(), out int result)) { }
+            //    else 
+            //     {
+            //     Console.WriteLine("invalid Input");
+            //     return true;
+            //     }
 
 
             switch (result)
@@ -38,7 +75,11 @@ namespace WeatherApi_console.ConsoleOption
                        await ConsoleLogic();
                         return ProgramLogicQuit;
                     }
-                default: return true;
+                default: 
+                    {
+                        Console.WriteLine("Invalid Choice");
+                        return true;
+                    };
             };
 
            // Console.WriteLine(_config["OpenweathermapApi:ApiKey"]);

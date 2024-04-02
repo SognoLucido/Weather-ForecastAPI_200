@@ -35,7 +35,7 @@ namespace WeatherApi_console.ConsoleOption
 
             _serviceLink = serviceLink;
             //serviceLink = services.GetRequiredService<IServiceLink>();
-            if (!MainOpenW.ValidApi)
+            if (MainOpenW.ValidApi)
             {
                 ProgramLogicQuit = true;
                 return;
@@ -117,7 +117,7 @@ namespace WeatherApi_console.ConsoleOption
                 Console.WriteLine($"Country: {cityinfo.Country}");
                 Console.WriteLine($"State: {cityinfo.State}");
             }
-            Console.WriteLine("-----------------------------------------------------------");
+            Console.WriteLine("---------------------------------------------------------------------");
 
 
 
@@ -192,9 +192,9 @@ namespace WeatherApi_console.ConsoleOption
 
 
 
-            Console.WriteLine("{0,-15} | {1,-24} | {2,-13}|", "WEATHER", "TIME(yyyy-MM-dd) UTC/GMT", "TEMP");
+            Console.WriteLine("{0,-25} | {1,-24} | {2,-13}|", "WEATHER - DESCRIPTION", "TIME(yyyy-MM-dd) UTC/GMT", "TEMP");
 
-            Console.WriteLine("-----------------------------------------------------------");
+            Console.WriteLine("--------------------------------------------------------------------|");
 
             foreach (var c in custoWmodel.CnameWeathers)
             {
@@ -202,13 +202,13 @@ namespace WeatherApi_console.ConsoleOption
 
                 if (c.Datatime.Contains("12:00:00") || c.Datatime.Contains("18:00:00") || c.Datatime.Contains("6:00:00"))
                 {
-                    Console.WriteLine("{0,-15} | {1,-24} | {2,-13}|", c.Main, c.Datatime, $"{c.Temperatures[0].Celsius}C {c.Temperatures[0].Kelvin}K {c.Temperatures[0].Fahrenheit}F");
+                    Console.WriteLine("{0,-25} | {1,-24} | {2,-13}|", $"{c.Main} - {c.Description}", c.Datatime, $"{c.Temperatures[0].Celsius}C {c.Temperatures[0].Kelvin}K {c.Temperatures[0].Fahrenheit}F");
                 }
-                if (c.Datatime.Contains("18:00:00")) Console.WriteLine("----------------------------------------------------------|");
+                if (c.Datatime.Contains("18:00:00")) Console.WriteLine("--------------------------------------------------------------------|");
             }
 
 
-            if (!custoWmodel.CnameWeathers[custoWmodel.CnameWeathers.Length - 1].Datatime.Contains("18:00:00")) Console.WriteLine("-----------------------------------------------------------");
+            if (!custoWmodel.CnameWeathers[custoWmodel.CnameWeathers.Length - 1].Datatime.Contains("18:00:00")) Console.WriteLine("---------------------------------------------------------------------");
     
 
 

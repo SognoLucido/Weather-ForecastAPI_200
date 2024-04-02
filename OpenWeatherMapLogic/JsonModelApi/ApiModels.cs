@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
 namespace OpenWeatherMapLogic.JsonModelApi;
 
@@ -35,6 +31,7 @@ public class ApiModels // the original Openweather api model MAP
     public class Weather
     {
         public string main { get; set; }
+        public string description { get; set; } 
     }
 
 }

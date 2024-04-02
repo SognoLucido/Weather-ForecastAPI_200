@@ -1,10 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static OpenWeatherMapLogic.JsonModelApi.ApiModels;
 using WeatherApi_console; 
 
 namespace OpenWeatherMapLogic.JsonModelApi;
@@ -41,6 +35,7 @@ public class apiModeltoModelconversion : IDisposable
                 {
                     Datatime = myDeserializedClass.list[i].dt_txt,
                     Main = myDeserializedClass.list[i].weather[0].main,
+                    Description = myDeserializedClass.list[i].weather[0].description,
 
                     Temperatures = new List<Temp>
                     {

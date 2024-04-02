@@ -1,4 +1,5 @@
 
+using DapperSqlite;
 using Microsoft.Extensions.DependencyInjection;
 using OpenWeatherMapLogic;
 using System;
@@ -10,6 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 //builder.Services.AddSingleton<IServiceLink,MainOpenW>();
+
+builder.Services.AddScoped<IDataServiceLink,DataManager>();
 builder.Services.AddHttpClient<IServiceLink,MainOpenW>();
 builder.Services.AddControllers();
 

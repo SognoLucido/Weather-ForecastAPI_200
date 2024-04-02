@@ -2,10 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using OpenWeatherMapLogic.JsonModelApi;
-using System;
-using System.Net.Http;
-using System.Reflection.Metadata.Ecma335;
-using System.Threading.Tasks;
+
 
 namespace OpenWeatherMapLogic
 {
@@ -64,7 +61,8 @@ namespace OpenWeatherMapLogic
 
             try
             {
-               // HttpResponseMessage response = await _httpClient.GetAsync("https://api.ipify.org");
+               // HttpResponseMessage responsev2 = await _httpClient.GetAsync(url);
+
                  response = await _httpClient.GetStringAsync(url);
 
 
@@ -84,7 +82,7 @@ namespace OpenWeatherMapLogic
             }
             else
             {
-               var x = JsonConvert.DeserializeObject<List<ApiModels.City>>(response);
+               //var x = JsonConvert.DeserializeObject<List<ApiModels.City>>(response);
 
                 return JsonConvert.DeserializeObject<List<ApiModels.City>>(response);
                
@@ -93,7 +91,7 @@ namespace OpenWeatherMapLogic
         }
 
 
-        public async Task<CustomWeathermodel> GetCityWeather(double? Latitude, double? Longitude)
+        public async Task<CustomWeathermodel?> GetCityWeather(double? Latitude, double? Longitude)
         {
             string url = @$"https://api.openweathermap.org/data/2.5/forecast?lat={Latitude}&lon={Longitude}&appid={Apikey}";
 
@@ -109,19 +107,13 @@ namespace OpenWeatherMapLogic
             catch (Exception ex)
             {
                 Console.WriteLine("An error occurred: " + ex.Message);
+                return null;
             }
 
 
             //  response = await _httpClient.GetStringAsync("https://api.ipify.org");
 
-            if (String.IsNullOrEmpty(response))
-            {
-                await Console.Out.WriteLineAsync("something went wrong : response string is empty");
-                return null;
-            }
-            else
-            {
-
+      
 
                 using (apiModeltoModelconversion convMtoM = new apiModeltoModelconversion())
                 {                  
@@ -132,7 +124,7 @@ namespace OpenWeatherMapLogic
 
 
 
-            }
+            
           
         }
 
