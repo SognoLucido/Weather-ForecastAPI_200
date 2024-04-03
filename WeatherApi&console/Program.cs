@@ -23,33 +23,18 @@ builder.Services.AddResponseCaching();
 var app = builder.Build();
 
 
-using(var consoleUI2 = new ConsoleUI(app.Services.GetService<IServiceLink>()!))
+
+using (var serviceScope = app.Services.CreateScope())
 {
-    if (await consoleUI2.ConsoleStart())
+   
+    ConsoleUI consoleUi = new ConsoleUI(app.Services.GetRequiredService<IServiceLink>()!, serviceScope.ServiceProvider.GetRequiredService<IDataServiceLink>());
+    if (await consoleUi.ConsoleStart())
     {
         Console.ReadLine();
         return;
     }
 
 }
-
-
-
-//using(var serviceScope = app.Services.CreateScope())
-//{
-//    var services = serviceScope.ServiceProvider;
-
-//    var myDependency = services.GetRequiredService<IServiceLink>();
-
-//    //  ConsoleUI consoleUi = new ConsoleUI(app.Configuration ,app.Services.GetService<IServiceLink>());
-//    ConsoleUI consoleUi = new ConsoleUI(app.Configuration ,myDependency);
-//    if (await consoleUi.ConsoleStart())
-//    {
-//        Console.ReadLine();
-//        return;
-//    }
-   
-//}
 
 
 if (app.Environment.IsDevelopment())

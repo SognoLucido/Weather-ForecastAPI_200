@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenWeatherMapLogic.JsonModelApi;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,6 @@ namespace DapperSqlite;
 
 public interface IDataServiceLink
 {
-    void hello();
+    Task UpdateDbfreshvalues(CustomWeathermodel weathermodel);
+    Task<CustomWeathermodel?> CityExist(string Cityinmethod);
 }

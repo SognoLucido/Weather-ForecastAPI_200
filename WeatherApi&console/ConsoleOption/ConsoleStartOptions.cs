@@ -10,9 +10,9 @@ namespace WeatherApi_console.ConsoleOption
     {
         public bool ProgramLogicQuit = false;
 
-        public IServiceLink? _serviceLink;
+       
 
-       public string? Keyz {  get; init; }
+   
 
        // public WeatherForecast? WeatherConvertion = new();
 

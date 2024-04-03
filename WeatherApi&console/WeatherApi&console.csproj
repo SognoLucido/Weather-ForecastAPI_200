@@ -17,4 +17,10 @@
     <ProjectReference Include="..\OpenWeatherMapLogic\OpenWeatherMapLogic.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="datacities.db">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

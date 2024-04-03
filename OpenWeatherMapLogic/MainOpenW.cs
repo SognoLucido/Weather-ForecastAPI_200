@@ -9,7 +9,7 @@ namespace OpenWeatherMapLogic
     public class MainOpenW : IServiceLink 
     {
        static string? Apikey { get; set; }
-       static public bool ValidApi => String.IsNullOrEmpty(Apikey);
+       static public bool notValidApi => String.IsNullOrEmpty(Apikey) || (Apikey.Length < 20);
        static public string? CityName { get; set; }
       
 
