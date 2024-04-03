@@ -37,18 +37,19 @@ namespace WeatherApi_console.Controllers
 
              MainOpenW.CityName = cityval.CityValidation;
 
-            //Response Caching Middleware only caches server responses that result in a 200(OK) status code.
-            //Any other responses, including error pages, are ignored by the middleware.
-            // TODO if invalid put on the db(invalid cities table) and check in it before of calling the api 
+           
+            
 
             List<ApiModels.City> pep =  await _serviceLink.GetCityInformation();
             Double? Latitude;
             Double? Longitude;
-               
+
+            //Response Caching Middleware only caches server responses that result in a 200(OK) status code.
+            //Any other responses, including error pages, are ignored by the middleware.
 
             if (pep.Count == 0)
             {
-                return BadRequest("Invalid City");
+                return Ok("Invalid City");
             }
 
             Latitude = pep[0].Lat;

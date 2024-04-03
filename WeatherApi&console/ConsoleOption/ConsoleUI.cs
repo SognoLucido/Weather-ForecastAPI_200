@@ -2,6 +2,8 @@
 using OpenWeatherMapLogic.JsonModelApi;
 using Newtonsoft.Json;
 using WeatherApi_console;
+using DapperSqlite;
+using System.Diagnostics.Eventing.Reader;
 
 
 namespace WeatherApi_console.ConsoleOption
@@ -13,48 +15,28 @@ namespace WeatherApi_console.ConsoleOption
         Double? Latitude;
         Double? Longitude;
 
-        string Cityok = string.Empty;
-        //public ConsoleUI(IConfiguration config,IServiceLink serviceLink)
-        //{
-        //   _serviceLink = serviceLink;
 
-        //    Keyz = config["OpenweathermapApi:ApiKey"];
-        //    if(String.IsNullOrEmpty(Keyz))
-        //    {
-        //        Console.WriteLine("key not Found");
-        //        ProgramLogicQuit = true;
-        //        return;
-        //    }
-
-        //}
+        private readonly IServiceLink? _serviceLink;
+        private readonly IDataServiceLink _dblink;
 
 
-        public ConsoleUI(IServiceLink serviceLink)
+        public ConsoleUI(IServiceLink serviceLink , IDataServiceLink dblink)
         {
 
-
             _serviceLink = serviceLink;
-            //serviceLink = services.GetRequiredService<IServiceLink>();
-            if (MainOpenW.ValidApi)
+            _dblink =  dblink;
+
+            if (MainOpenW.notValidApi)
             {
                 ProgramLogicQuit = true;
                 return;
             }
-            //Keyz = config.GetValue<string>("OpenweathermapApi:ApiKey");
-            //if (String.IsNullOrEmpty(Keyz) || Keyz.Length <= 25)
-            //{
-            //    Console.WriteLine("key not Found / Invalid key");
-            //    ProgramLogicQuit = true;
-            //    return;
-            //}
-
+          
         }
 
         public override async Task ConsoleLogic()
         {
-
-          
-
+     
 
             while (true)
             {
@@ -67,17 +49,28 @@ namespace WeatherApi_console.ConsoleOption
 
                 if (MainOpenW.CityName != "") break;
 
-
-
-
             }
 
-            //_serviceLink.Apikey = Keyz;
-            //_serviceLink.CityName = Cityok;
 
 
-            await DisplayCityInfo();
-            await DisplayWeatherInfo();
+             CustomWeathermodel? custommodel = await _dblink.CityExist(MainOpenW.CityName);
+
+           // CustomWeathermodel? custommodel = null;
+
+            if (custommodel is null)
+            {
+                await DisplayCityInfo();
+                await DisplayWeatherInfo(custommodel);
+            }
+            else
+            {
+                await DisplayWeatherInfo(custommodel);
+            }
+
+
+
+
+
 
 
 
@@ -116,6 +109,7 @@ namespace WeatherApi_console.ConsoleOption
                 Console.WriteLine($"Longitude: {cityinfo.Lon}");
                 Console.WriteLine($"Country: {cityinfo.Country}");
                 Console.WriteLine($"State: {cityinfo.State}");
+                Console.WriteLine($"Date time UTC now :{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")} ");
             }
             Console.WriteLine("---------------------------------------------------------------------");
 
@@ -125,71 +119,27 @@ namespace WeatherApi_console.ConsoleOption
 
 
 
-        public async Task DisplayWeatherInfo()
+        public async Task DisplayWeatherInfo(CustomWeathermodel custoWmodel)
         {
 
 
-            CustomWeathermodel custoWmodel = new CustomWeathermodel();
+           
 
             string? response = string.Empty;
 
 
-            custoWmodel = await _serviceLink.GetCityWeather(Latitude, Longitude);
+            if(custoWmodel is null)
+            {
+                custoWmodel = await _serviceLink.GetCityWeather(Latitude, Longitude);
 
 
-            //ApiModels.Root myDeserializedClass = JsonConvert.DeserializeObject<ApiModels.Root>(response);
+               await _dblink.UpdateDbfreshvalues(custoWmodel);
+
+            }
+           
 
 
-
-            //if (true) ;
-
-
-            //CustomWeathermodel custoWmodel = new()
-            //{
-            //    CityNameModel = Cityok,
-            //    CnameWeathers = new CustomWeather[myDeserializedClass.list.Count]
-            //};
-
-
-
-
-
-
-
-            //for (int i = 0; i < myDeserializedClass.list.Count; i++)
-            //{
-
-            //    custoWmodel.CnameWeathers[i] = new CustomWeather
-            //    {
-            //        Datatime = myDeserializedClass.list[i].dt_txt,
-            //        Main = myDeserializedClass.list[i].weather[0].main,
-
-            //        Temperatures = new List<Temp>
-            //        {
-            //           new Temp 
-            //           { 
-            //               Celsius = TempConversion.TempConversionKtoC(myDeserializedClass.list[i].main.temp),
-            //                Fahrenheit = TempConversion.TempConversionKtoF(myDeserializedClass.list[i].main.temp),
-            //                Kelvin = TempConversion.Tempcastingtoint(myDeserializedClass.list[i].main.temp)
-            //           }
-                     
-
-            //        }
-
-            //    };
-
-
-            //    //custoWmodel.CnameWeathers[i].Main = myDeserializedClass.list[i].weather[0].main;
-
-            //    //custoWmodel.CnameWeathers[i].Temperatures[0].Celsius = WeatherForecast.TempConversionKtoC(myDeserializedClass.list[i].main.temp);
-            //    //custoWmodel.CnameWeathers[i].Temperatures[0].Fahrenheit = WeatherForecast.TempConversionKtoF(myDeserializedClass.list[i].main.temp);
-            //    //custoWmodel.CnameWeathers[i].Temperatures[0].Kelvin = WeatherForecast.Tempcastingtoint(myDeserializedClass.list[i].main.temp);
-            //    // custoWmodel.CnameWeathers[i] = myDeserializedClass.list[i].dt_txt;
-
-            //}
-
-
-
+         
 
 
             Console.WriteLine("{0,-25} | {1,-24} | {2,-13}|", "WEATHER - DESCRIPTION", "TIME(yyyy-MM-dd) UTC/GMT", "TEMP");
@@ -214,22 +164,13 @@ namespace WeatherApi_console.ConsoleOption
 
 
 
-            //for (int i = 0; i < myDeserializedClass.list.Count; i++)
-            //{
-
-            //    var x = custoWmodel.CnameWeathers[i];
-            //   // custoWmodel.CnameWeathers[i] = myDeserializedClass.list[i].dt_txt;
-
-            //}
-
-              Console.WriteLine();
 
         }
 
         public void Dispose()
         {
            
-            _serviceLink = null;
+          //  _serviceLink = null;
         }
 
 
