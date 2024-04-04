@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DapperSqlite.Model
 {
-    public class ReturnTableDatacitymodel
+    public class TableDatacitydbmodel
     {
         public int id {  get; set; }
 

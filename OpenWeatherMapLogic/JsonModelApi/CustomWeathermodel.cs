@@ -3,6 +3,8 @@
 public class CustomWeathermodel
 {
    public string CityNameModel { get; set; }
+
+   public string Datafrom { get; set; } = string.Empty;
    
    public CustomWeather[] CnameWeathers { get; set; }
    

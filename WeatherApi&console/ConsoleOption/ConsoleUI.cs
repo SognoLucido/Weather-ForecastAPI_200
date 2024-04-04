@@ -6,203 +6,187 @@ using DapperSqlite;
 using System.Diagnostics.Eventing.Reader;
 
 
-namespace WeatherApi_console.ConsoleOption
+namespace WeatherApi_console.ConsoleOption;
+
+public class ConsoleUI : ConsoleStartOptions, IDisposable
 {
-    public class ConsoleUI : ConsoleStartOptions, IDisposable
-    {
+    CustomWeathermodel? custommodel;
 
+    string? Cityname = "";
 
-        Double? Latitude;
-        Double? Longitude;
+    Double? Latitude;
+    Double? Longitude;
 
+    bool Enablesqlitefetch = false;
+   
 
-        private readonly IServiceLink? _serviceLink;
-        private readonly IDataServiceLink _dblink;
-
-
-        public ConsoleUI(IServiceLink serviceLink , IDataServiceLink dblink)
-        {
-
-            _serviceLink = serviceLink;
-            _dblink =  dblink;
-
-            if (MainOpenW.notValidApi)
-            {
-                ProgramLogicQuit = true;
-                return;
-            }
-          
-        }
-
-        public override async Task ConsoleLogic()
-        {
-     
-
-            while (true)
-            {
-
-                Console.Write("Insert City Name : ");
-
-                MainOpenW.CityName = Console.ReadLine();
-
-                Console.Clear();
-
-                if (MainOpenW.CityName != "") break;
-
-            }
-
-
-
-             CustomWeathermodel? custommodel = await _dblink.CityExist(MainOpenW.CityName);
-
-           // CustomWeathermodel? custommodel = null;
-
-            if (custommodel is null)
-            {
-                await DisplayCityInfo();
-                await DisplayWeatherInfo(custommodel);
-            }
-            else
-            {
-                await DisplayWeatherInfo(custommodel);
-            }
-
-
-
-
-
-
-
-
-
-
-
-
-
-            //  string response = await serviceLink.GetStringAsync("wtf");    
-            //  HttpResponseMessage response = await _httpClient.GetAsync("https://api.ipify.org");
-            //  response.EnsureSuccessStatusCode(); // Ensure success status code
-            //string pep = await response.Content.ReadAsStringAsync();
-
-
-        }
-
-
-
-        public async Task DisplayCityInfo()
-        {
-
-            List<ApiModels.City>? pep = await _serviceLink.GetCityInformation();
-
-
-            if (pep is null || (pep[0].Lat) is null || (pep[0].Lon) is null) return;
-            else
-            {
-                Latitude = pep[0].Lat;
-                Longitude = pep[0].Lon;
-            }
-
-            foreach (var cityinfo in pep)
-            {
-                Console.WriteLine($"Name: {cityinfo.Name}");
-                Console.WriteLine($"Latitude: {cityinfo.Lat}");
-                Console.WriteLine($"Longitude: {cityinfo.Lon}");
-                Console.WriteLine($"Country: {cityinfo.Country}");
-                Console.WriteLine($"State: {cityinfo.State}");
-                Console.WriteLine($"Date time UTC now :{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")} ");
-            }
-            Console.WriteLine("---------------------------------------------------------------------");
-
-
-
-        }
-
-
-
-        public async Task DisplayWeatherInfo(CustomWeathermodel custoWmodel)
-        {
-
-
-           
-
-            string? response = string.Empty;
-
-
-            if(custoWmodel is null)
-            {
-                custoWmodel = await _serviceLink.GetCityWeather(Latitude, Longitude);
-
-
-               await _dblink.UpdateDbfreshvalues(custoWmodel);
-
-            }
-           
-
-
-         
-
-
-            Console.WriteLine("{0,-25} | {1,-24} | {2,-13}|", "WEATHER - DESCRIPTION", "TIME(yyyy-MM-dd) UTC/GMT", "TEMP");
-
-            Console.WriteLine("--------------------------------------------------------------------|");
-
-            foreach (var c in custoWmodel.CnameWeathers)
-            {
-
-
-                if (c.Datatime.Contains("12:00:00") || c.Datatime.Contains("18:00:00") || c.Datatime.Contains("6:00:00"))
-                {
-                    Console.WriteLine("{0,-25} | {1,-24} | {2,-13}|", $"{c.Main} - {c.Description}", c.Datatime, $"{c.Temperatures[0].Celsius}C {c.Temperatures[0].Kelvin}K {c.Temperatures[0].Fahrenheit}F");
-                }
-                if (c.Datatime.Contains("18:00:00")) Console.WriteLine("--------------------------------------------------------------------|");
-            }
-
-
-            if (!custoWmodel.CnameWeathers[custoWmodel.CnameWeathers.Length - 1].Datatime.Contains("18:00:00")) Console.WriteLine("---------------------------------------------------------------------");
+    
+    private readonly IDataServiceLink _dblink;
     
 
+    public ConsoleUI(IServiceLink serviceLink , IDataServiceLink dblink ,IConfiguration config)
+    {
+
+        _serviceLink = serviceLink;
+        _dblink =  dblink;
+        _config = config;
 
 
-
-
-        }
-
-        public void Dispose()
+        if (_config["EnableSqlite"].ToLower() == "true" )
         {
-           
-          //  _serviceLink = null;
+            Enablesqlitefetch = true;
+        }
+        
+        if (MainOpenW.notValidApi)
+        {
+            ProgramLogicQuit = true;
+            return;
+        }
+      
+    }
+    public override async Task ConsoleLogic()
+    {
+ 
+        while (true)
+        {
+
+            Console.Write("Insert City Name : ");
+
+            Cityname = Console.ReadLine();
+
+            Console.Clear();
+
+            if (!String.IsNullOrEmpty(Cityname))
+            {
+                Cityname = Cityname.ToLower();
+                Cityname = Cityname[0].ToString().ToUpper() + Cityname.Substring(1);
+                break;
+            }
+                
+
+
+        }
+
+
+        if(Enablesqlitefetch)
+        {
+             custommodel = await _dblink.CityExist(Cityname!);
+        }
+        else
+        {
+             custommodel = null;
+        }
+
+      
+
+        if (custommodel is null )
+        {
+            if(await DisplayCityInfo()) return;
+            await DisplayWeatherInfo(custommodel);
+        }
+        else
+        {
+            await DisplayWeatherInfo(custommodel);
+        }
+
+
+    }
+
+
+
+    public async Task<bool> DisplayCityInfo()
+    {
+
+        List<ApiModels.City>? pep = await _serviceLink.GetCityInformation(Cityname);
+
+
+        if (pep.Count == 0)
+        {
+            Console.WriteLine("Invalid City");
+           return true;
+            
+        }        
+        else
+        {
+            Latitude = pep[0].Lat;
+            Longitude = pep[0].Lon;
+        }
+
+        foreach (var cityinfo in pep)
+        {
+            Console.WriteLine($"Name: {cityinfo.Name}");
+            Console.WriteLine($"Latitude: {cityinfo.Lat}");
+            Console.WriteLine($"Longitude: {cityinfo.Lon}");
+            Console.WriteLine($"Country: {cityinfo.Country}");
+            Console.WriteLine($"State: {cityinfo.State}");
+        }
+        
+
+        return false;
+    }
+
+
+
+    public async Task DisplayWeatherInfo(CustomWeathermodel custoWmodel)
+    {
+    
+
+     
+        string? response = string.Empty;
+
+
+        if(custoWmodel is null )
+        {
+            custoWmodel = await _serviceLink.GetCityWeather(Latitude, Longitude, Cityname);
+           await _dblink.UpdateDbvalues(custoWmodel);
+
+            Console.WriteLine("Fetched from the Api");
+
+        }
+        else
+        {
+            Console.WriteLine("Fetched from the database");
         }
 
 
 
+        
+        Console.WriteLine($"Date time UTC now :{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")} ");
+        Console.WriteLine("---------------------------------------------------------------------");
+
+        Console.WriteLine("{0,-25} | {1,-24} | {2,-13}|", "WEATHER - DESCRIPTION", "TIME(yyyy-MM-dd) UTC/GMT", "TEMP");
+
+        Console.WriteLine("--------------------------------------------------------------------|");
+
+        foreach (var c in custoWmodel.CnameWeathers)
+        {
+
+            if (c.Datatime.Contains("12:00:00") || c.Datatime.Contains("18:00:00") || c.Datatime.Contains("6:00:00"))
+            {
+                Console.WriteLine("{0,-25} | {1,-24} | {2,-13}|", $"{c.Main} - {c.Description}", c.Datatime, $"{c.Temperatures[0].Celsius}C {c.Temperatures[0].Kelvin}K {c.Temperatures[0].Fahrenheit}F");
+            }
+            if (c.Datatime.Contains("18:00:00")) Console.WriteLine("--------------------------------------------------------------------|");
+        }
 
 
-
-
-
-
-        //public async Task DisplayWeatherInfo() // todoooooo
-        //{
-
-        //   string response = string.Empty;
-
-        //    if (pep is null) return;
-
-        //    foreach (var cityinfo in pep)
-        //    {
-        //        Console.WriteLine($"Name: {cityinfo.Name}");
-        //        Console.WriteLine($"Latitude: {cityinfo.Lat}");
-        //        Console.WriteLine($"Longitude: {cityinfo.Lon}");
-        //        Console.WriteLine($"Country: {cityinfo.Country}");
-        //        Console.WriteLine($"State: {cityinfo.State}");
-        //    }
-        //    Console.WriteLine("-----------------------------------------------------------");
-        //}
-
-
-
+        if (!custoWmodel.CnameWeathers[custoWmodel.CnameWeathers.Length - 1].Datatime.Contains("18:00:00")) Console.WriteLine("---------------------------------------------------------------------");
 
 
     }
 
+    public void Dispose()
+    {
+        custommodel = null;
+        Cityname = null;
+        Latitude = null; 
+        Longitude = null;
+        _config = null;
+        _serviceLink = null;
     }
+
+
+
+
+}
+
+

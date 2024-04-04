@@ -20,42 +20,43 @@ public class DataManager : IDataServiceLink
 
 
 
-    public async Task UpdateDbfreshvalues(CustomWeathermodel weathermodel)
+    public async Task UpdateDbvalues(CustomWeathermodel weathermodel)
     {
 
 
-
-        using (var connection = new SQLiteConnection(_config.GetConnectionString("Sqlite"))) // TODO 
+        using (var connection = new SQLiteConnection(_config.GetConnectionString("Sqlite"))) 
         {
 
 
-            try
-            {
+           
+                var sql = "INSERT INTO MainCheck (City, Timeout) VALUES (@CityNameModel, @Datatime); SELECT last_insert_rowid(); ";
 
-              
-
-
-                var sql = "INSERT INTO MainCheck (City, Timeout) VALUES (@CityNameModel, @Datatime)";
-
-                var id = connection.Execute(sql, new { CityNameModel = weathermodel.CityNameModel, Datatime = weathermodel.CnameWeathers[0].Datatime });
-
-
-                
-                // Console.WriteLine();
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+                var idreturn = connection.QuerySingle<int>(sql, new { CityNameModel = weathermodel.CityNameModel, Datatime = weathermodel.CnameWeathers[0].Datatime });
 
 
 
+                sql = "INSERT INTO Datacity (id, data_time, simple_description, detailed_description, temp_C, temp_F, temp_K) VALUES(@Mainid, @Time, @Simpledescr, @Detaileddescr, @tempC, @tempF, @tempK); ";
 
 
+                try 
+                {
+
+                   foreach(var item in weathermodel.CnameWeathers) 
+                    {
+
+                     await connection.ExecuteAsync(sql, new { Mainid = idreturn, Time = item.Datatime , Simpledescr = item.Main , Detaileddescr = item.Description , tempC = item.Temperatures[0].Celsius , tempF = item.Temperatures[0].Fahrenheit , tempK = item.Temperatures[0].Kelvin });
+                    }
+
+                   
+
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                        
+       
         }
-
-
 
 
     }
@@ -71,11 +72,11 @@ public class DataManager : IDataServiceLink
 
         using (var connection = new SQLiteConnection(_config.GetConnectionString("Sqlite")))
         {
-            var sql = "SELECT * FROM MainCheck WHERE City=@city ORDER BY Timeout ASC";
+            var sql = "SELECT * FROM MainCheck WHERE City=@city ORDER BY Timeout DESC , id DESC";
 
             try
             {
-                var x = await connection.QueryFirstOrDefaultAsync<Checkreturn>(sql, new { city = Cityinmethod });
+                var x = await connection.QueryFirstOrDefaultAsync<TableMainCheckdbmodel>(sql, new { city = Cityinmethod });
 
                 if (x != null)
                 {
@@ -87,15 +88,16 @@ public class DataManager : IDataServiceLink
 
                         // TimeSpan difference = DateTime.UtcNow - dbDateTime;
 
-                        var y = DateTime.UtcNow.Hour - dbDateTime.Hour;
+                        var y = DateTime.UtcNow - dbDateTime;     
+                      
 
-                        if (y < 4)
+                        if (y.TotalHours < 2)  // care : update the database with the new valor or not
                         {
                             var customWeathermodel = new CustomWeathermodel();
 
                             sql = "SELECT * FROM Datacity WHERE id=@id ORDER BY data_time ASC";
 
-                            var pep = connection.Query<ReturnTableDatacitymodel>(sql, new { id = x.Id }).ToList();
+                            var pep = connection.Query<TableDatacitydbmodel>(sql, new { id = x.Id }).ToList();
 
 
 
@@ -128,7 +130,7 @@ public class DataManager : IDataServiceLink
                                 };
                             }
 
-
+                            customWeathermodel.Datafrom = "sqlserver";
 
                             return customWeathermodel;
 

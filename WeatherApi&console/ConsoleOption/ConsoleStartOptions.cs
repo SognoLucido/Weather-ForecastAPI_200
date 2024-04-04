@@ -10,12 +10,8 @@ namespace WeatherApi_console.ConsoleOption
     {
         public bool ProgramLogicQuit = false;
 
-       
-
-   
-
-       // public WeatherForecast? WeatherConvertion = new();
-
+       public  IConfiguration _config;
+       public  IServiceLink _serviceLink;
 
         public async Task<bool> ConsoleStart()
         {
@@ -24,7 +20,7 @@ namespace WeatherApi_console.ConsoleOption
             int result = 0;
 
             while(true){ 
-                Console.Write("Choose One : Console Weather OneShot(1), APi Weather server(2), Both(3) : ");
+                Console.Write("Choose One : Console Weather OneShot(1), APi Weather server(2), Both(3), CheckAPIkey (4): ");
 
               string input = Console.ReadLine();
 
@@ -49,17 +45,12 @@ namespace WeatherApi_console.ConsoleOption
             }
 
 
+            if (MainOpenW.notValidApi)
+            {
+                Console.WriteLine("invalid APikey");
+                return true;
+            }
 
-
-
-            // Console.Write("Choose One : Console Weather OneShot(1), APi Weather server(2), Both(3) : ");
-
-            //if( int.TryParse(Console.ReadLine(), out int result)) { }
-            //    else 
-            //     {
-            //     Console.WriteLine("invalid Input");
-            //     return true;
-            //     }
 
 
             switch (result)
@@ -75,6 +66,12 @@ namespace WeatherApi_console.ConsoleOption
                        await ConsoleLogic();
                         return ProgramLogicQuit;
                     }
+                case 4: 
+                    {
+                        ApiValidation apiValidation = new();
+
+                        return true;
+                     };
                 default: 
                     {
                         Console.WriteLine("Invalid Choice");

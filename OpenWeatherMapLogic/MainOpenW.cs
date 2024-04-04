@@ -2,14 +2,15 @@
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using OpenWeatherMapLogic.JsonModelApi;
+using System.Data;
 
 
 namespace OpenWeatherMapLogic
 {
     public class MainOpenW : IServiceLink 
     {
-       static string? Apikey { get; set; }
-       static public bool notValidApi => String.IsNullOrEmpty(Apikey) || (Apikey.Length < 20);
+       private static string? Apikey { get; set; }
+       static public bool notValidApi => String.IsNullOrEmpty(MainOpenW.Apikey) || (MainOpenW.Apikey.Length < 20);
        static public string? CityName { get; set; }
       
 
@@ -27,35 +28,10 @@ namespace OpenWeatherMapLogic
 
 
 
-        //private readonly IHttpClientFactory _httpClientFactory;
-
-        //public MainOpenW(IServiceProvider.Getsevice httpClientFactory) =>
-        //    _httpClientFactory = httpClientFactory;
-
-
-        //public async Task<string> GetStringAsync(string url)
-        //{
-        //    try
-        //    {
-        //        HttpResponseMessage response = await _httpClient.GetAsync("https://api.ipify.org");
-        //        response.EnsureSuccessStatusCode(); // Ensure success status code
-        //        return await response.Content.ReadAsStringAsync();
-        //    }
-        //    catch (HttpRequestException ex)
-        //    {
-        //        // Handle request exceptions
-        //        Console.WriteLine($"request failed: {ex.Message}");
-        //        return string.Empty;
-        //    }
-        //}
-
-
-        public async Task<List<ApiModels.City>?> GetCityInformation()
+        public async Task<List<ApiModels.City>?> GetCityInformation(string city)
         {
 
-
-            string url = @$"https://api.openweathermap.org/geo/1.0/direct?q={CityName}&appid={Apikey}";
-
+            string url = @$"https://api.openweathermap.org/geo/1.0/direct?q={city}&appid={Apikey}";
 
             string response = string.Empty;
 
@@ -91,7 +67,8 @@ namespace OpenWeatherMapLogic
         }
 
 
-        public async Task<CustomWeathermodel?> GetCityWeather(double? Latitude, double? Longitude)
+
+        public async Task<CustomWeathermodel?> GetCityWeather(double? Latitude, double? Longitude , string City)
         {
             string url = @$"https://api.openweathermap.org/data/2.5/forecast?lat={Latitude}&lon={Longitude}&appid={Apikey}";
 
@@ -113,23 +90,28 @@ namespace OpenWeatherMapLogic
 
             //  response = await _httpClient.GetStringAsync("https://api.ipify.org");
 
-      
-
                 using (apiModeltoModelconversion convMtoM = new apiModeltoModelconversion())
                 {                  
-                    CustomWeathermodel custom = convMtoM.conversion(response);           
-                     return custom;
+                    CustomWeathermodel custom = convMtoM.conversion(response, City);   
+                
+                    custom.Datafrom = "Api";
+                    return custom;
 
                 }
-
-
-
-            
-          
+             
         }
 
 
-       
+        public async Task<bool> QuickvalidCheck() //TODO
+        {
+            string url = $@"https://api.openweathermap.org/data/2.5/forecast?appid={Apikey}";
+
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
+
+
+
+            return false;
+        }
 
 
 

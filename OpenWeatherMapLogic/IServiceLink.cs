@@ -5,19 +5,12 @@
 namespace OpenWeatherMapLogic
 {
     public interface IServiceLink
-    {
-      
-      //  string CityName { set; }
+    {   
+     
+        Task<List<ApiModels.City>?> GetCityInformation(string city);
 
-       
+        Task<CustomWeathermodel?> GetCityWeather(double? Latitude, double? Longitude,string city);
 
-      //  bool ValidApi { get; }
-
-        Task<List<ApiModels.City>?> GetCityInformation();
-
-        Task<CustomWeathermodel?> GetCityWeather(double? Latitude, double? Longitude);
-
-       // Task<string> GetStringAsync(string url);
-
+        Task<bool> QuickvalidCheck();
     }
 }

@@ -9,6 +9,6 @@ namespace DapperSqlite;
 
 public interface IDataServiceLink
 {
-    Task UpdateDbfreshvalues(CustomWeathermodel weathermodel);
+    Task UpdateDbvalues(CustomWeathermodel weathermodel);
     Task<CustomWeathermodel?> CityExist(string Cityinmethod);
 }

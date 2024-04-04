@@ -5,58 +5,59 @@ using OpenWeatherMapLogic;
 using OpenWeatherMapLogic.JsonModelApi;
 using WeatherApi_console.Model;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using static OpenWeatherMapLogic.JsonModelApi.ApiModels;
 
 
 
 
-namespace WeatherApi_console.Controllers
+namespace WeatherApi_console.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public partial class WeatherForecastController : ControllerBase 
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class WeatherForecastController : ControllerBase 
-    {
-        private readonly IServiceLink _serviceLink;
 
-        public WeatherForecastController(IServiceLink serviceLink)
+    string Cityname = "";
+
+   
+
+    [HttpGet("{City}")]
+    [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any , NoStore = false)]
+    public async Task<ActionResult<CustomWeathermodel>>  Get(ValidationCityModel cityval)
+    {
+        if (!ModelState.IsValid)
         {
-            _serviceLink = serviceLink;
+            return BadRequest(ModelState);
         }
 
+        Cityname = UpcaseCityname(cityval.CityValidation);
 
 
+         var citymodel = await Fetchdbdata(Cityname);
 
 
-        [HttpGet("{City}")]
-        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any , NoStore = false)]
-        public async Task<ActionResult<CustomWeathermodel>>  Get(ValidationCityModel cityval)
+        if (citymodel is not null )
+        {        
+            return Ok(citymodel);
+        }
+        else
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
 
-             MainOpenW.CityName = cityval.CityValidation;
-
-           
-            
-
-            List<ApiModels.City> pep =  await _serviceLink.GetCityInformation();
-            Double? Latitude;
-            Double? Longitude;
-
+ 
             //Response Caching Middleware only caches server responses that result in a 200(OK) status code.
             //Any other responses, including error pages, are ignored by the middleware.
 
-            if (pep.Count == 0)
+            if (await Checkinvalidcity())
             {
                 return Ok("Invalid City");
             }
 
-            Latitude = pep[0].Lat;
-            Longitude = pep[0].Lon;
 
 
-            var Result = await _serviceLink.GetCityWeather(Latitude, Longitude);
+
+            var Result = await _serviceLink.GetCityWeather(Latitude, Longitude, Cityname);
+
+     
 
             if (Result is null)
             {
@@ -64,16 +65,16 @@ namespace WeatherApi_console.Controllers
             }
             else
             {
+                if (Enablesqlitefetch)
+                {
+                    await Saveresulttodb(Result);
+                }
+
                 return Ok(Result);
             }
 
 
-           
-            
         }
-
-
-
 
 
 
@@ -83,4 +84,15 @@ namespace WeatherApi_console.Controllers
 
 
     }
+
+
+
+
+
+
+
+
+
+
+
 }

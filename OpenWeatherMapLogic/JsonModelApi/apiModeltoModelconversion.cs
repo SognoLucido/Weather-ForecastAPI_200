@@ -10,7 +10,7 @@ public class apiModeltoModelconversion : IDisposable
     CustomWeathermodel? custoWmodel;
 
 
-    public CustomWeathermodel conversion(string respose) 
+    public CustomWeathermodel conversion(string respose , string city) 
     {
        
 
@@ -18,7 +18,7 @@ public class apiModeltoModelconversion : IDisposable
 
          custoWmodel = new()
         {
-            CityNameModel = MainOpenW.CityName,
+            CityNameModel = city,
             CnameWeathers = new CustomWeather[myDeserializedClass.list.Count]
         };
 
@@ -60,10 +60,7 @@ public class apiModeltoModelconversion : IDisposable
 
         return custoWmodel;
 
-
-
-
-    
+   
     }
 
     public void Dispose()
