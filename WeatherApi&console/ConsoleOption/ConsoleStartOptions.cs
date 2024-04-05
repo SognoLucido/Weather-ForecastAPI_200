@@ -11,7 +11,11 @@ namespace WeatherApi_console.ConsoleOption
         public bool ProgramLogicQuit = false;
 
        public  IConfiguration _config;
-       public  IServiceLink _serviceLink;
+
+       public  IServiceLink _serviceLink {  get; init; }
+
+      
+
 
         public async Task<bool> ConsoleStart()
         {
@@ -43,11 +47,11 @@ namespace WeatherApi_console.ConsoleOption
                 }
   
             }
-
+             
 
             if (MainOpenW.notValidApi)
             {
-                Console.WriteLine("invalid APikey");
+                Console.WriteLine("invalid APikey , please put a valid API key in appsettings.json");
                 return true;
             }
 
@@ -68,7 +72,9 @@ namespace WeatherApi_console.ConsoleOption
                     }
                 case 4: 
                     {
-                        ApiValidation apiValidation = new();
+                        var apiValidation = new ApiValidation();
+
+                        await apiValidation.Validationgetapi(_serviceLink);
 
                         return true;
                      };

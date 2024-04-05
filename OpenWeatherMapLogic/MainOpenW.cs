@@ -10,8 +10,20 @@ namespace OpenWeatherMapLogic
     public class MainOpenW : IServiceLink 
     {
        private static string? Apikey { get; set; }
-       static public bool notValidApi => String.IsNullOrEmpty(MainOpenW.Apikey) || (MainOpenW.Apikey.Length < 20);
-       static public string? CityName { get; set; }
+       public static bool notValidApi => String.IsNullOrEmpty(MainOpenW.Apikey) || (MainOpenW.Apikey.Length < 20);
+   
+
+       public string GetApishow
+        {
+            get
+            { 
+                string peppe =  Apikey.Substring(Apikey.Length - 5);
+
+                string obscure = new string('*', Apikey.Length - 5);
+
+                return obscure + peppe; 
+            } 
+        }
       
 
         private readonly HttpClient _httpClient;
@@ -104,13 +116,14 @@ namespace OpenWeatherMapLogic
 
         public async Task<bool> QuickvalidCheck() //TODO
         {
-            string url = $@"https://api.openweathermap.org/data/2.5/forecast?appid={Apikey}";
+            string url = @$"https://api.openweathermap.org/data/2.5/forecast?lat=44,40726&lon=8,9338624&appid={Apikey}";
 
-            HttpResponseMessage response = await _httpClient.GetAsync(url);
+            HttpResponseMessage responsemessagge = await _httpClient.GetAsync(url);
 
-
+            if (responsemessagge.IsSuccessStatusCode) return true;
 
             return false;
+                    
         }
 
 

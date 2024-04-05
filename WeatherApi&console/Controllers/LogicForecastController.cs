@@ -30,7 +30,7 @@ namespace WeatherApi_console.Controllers
 
             if (MainOpenW.notValidApi)
             {
-                Console.WriteLine("invalid api key");
+                Console.WriteLine("invalid api key, please put a valid API key in appsettings.json");
                 return;
             }
 

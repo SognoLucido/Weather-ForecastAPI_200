@@ -12,5 +12,7 @@ namespace OpenWeatherMapLogic
         Task<CustomWeathermodel?> GetCityWeather(double? Latitude, double? Longitude,string city);
 
         Task<bool> QuickvalidCheck();
+
+        string GetApishow { get; }
     }
 }

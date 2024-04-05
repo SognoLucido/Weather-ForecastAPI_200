@@ -27,6 +27,8 @@ public class ConsoleUI : ConsoleStartOptions, IDisposable
     public ConsoleUI(IServiceLink serviceLink , IDataServiceLink dblink ,IConfiguration config)
     {
 
+      
+
         _serviceLink = serviceLink;
         _dblink =  dblink;
         _config = config;
@@ -138,7 +140,10 @@ public class ConsoleUI : ConsoleStartOptions, IDisposable
         if(custoWmodel is null )
         {
             custoWmodel = await _serviceLink.GetCityWeather(Latitude, Longitude, Cityname);
-           await _dblink.UpdateDbvalues(custoWmodel);
+
+            if (Enablesqlitefetch) { 
+                await _dblink.UpdateDbvalues(custoWmodel);
+                }
 
             Console.WriteLine("Fetched from the Api");
 
@@ -181,7 +186,7 @@ public class ConsoleUI : ConsoleStartOptions, IDisposable
         Latitude = null; 
         Longitude = null;
         _config = null;
-        _serviceLink = null;
+        //_serviceLink = null;
     }
 
 

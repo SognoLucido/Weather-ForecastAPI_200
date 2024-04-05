@@ -78,11 +78,6 @@ public partial class WeatherForecastController : ControllerBase
 
 
 
-
-
-
-
-
     }
 
 

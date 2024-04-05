@@ -27,7 +27,7 @@ var app = builder.Build();
 using (var serviceScope = app.Services.CreateScope())
 {
 
-    using (var consoleUi = new ConsoleUI(app.Services.GetRequiredService<IServiceLink>()!, serviceScope.ServiceProvider.GetRequiredService<IDataServiceLink>(), app.Configuration)) 
+    using (var consoleUi = new ConsoleUI(app.Services.GetRequiredService<IServiceLink>()!, serviceScope.ServiceProvider.GetRequiredService<IDataServiceLink>(), app.Configuration)) //
     { 
         if (await consoleUi.ConsoleStart())
         {
