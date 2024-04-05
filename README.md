@@ -4,3 +4,8 @@
 ***How does it work?*** Open the appsettings.json file, set the API key,and you are good to go.You will be prompted with various choices in the terminal. (Suggestion: first verify the API key).The values are fetched from the OpenWeatherMap API. 
 
 ***Where do I get the API key?*** This API is based on [OpenWeathermapSITE](https://home.openweathermap.org/api_keys), get it from there. Currently, I am using the Free plan.
+
+# Concept
+
+![Untitled-2024-04-05-1357](https://github.com/SognoLucido/Weather-ForecastAPI_200/assets/123832236/2a44acd2-38a9-4dfe-b5c6-a462bcda1d64)
+
