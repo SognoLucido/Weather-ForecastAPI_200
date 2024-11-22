@@ -4,7 +4,7 @@ using System.Diagnostics.Eventing.Reader;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace WeatherApi_console.ConsoleOption
+namespace WeatherApi.ConsoleOption
 {
     public abstract class ConsoleStartOptions
     {

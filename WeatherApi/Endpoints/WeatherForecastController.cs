@@ -3,14 +3,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OpenWeatherMapLogic;
 using OpenWeatherMapLogic.JsonModelApi;
-using WeatherApi_console.Model;
+using WeatherApi.Model;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using static OpenWeatherMapLogic.JsonModelApi.ApiModels;
 
 
 
 
-namespace WeatherApi_console.Controllers;
+namespace WeatherApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]

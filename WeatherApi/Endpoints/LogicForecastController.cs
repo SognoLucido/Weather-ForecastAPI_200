@@ -2,7 +2,7 @@
 using OpenWeatherMapLogic;
 using OpenWeatherMapLogic.JsonModelApi;
 
-namespace WeatherApi_console.Controllers
+namespace WeatherApi.Controllers
 {
     public partial class WeatherForecastController
     {

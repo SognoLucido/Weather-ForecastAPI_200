@@ -1,6 +1,6 @@
 ﻿using OpenWeatherMapLogic;
 
-namespace WeatherApi_console.ConsoleOption
+namespace WeatherApi.ConsoleOption
 {
     public  class ApiValidation : ConsoleStartOptions 
     {

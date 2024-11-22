@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using WeatherApi_console; 
+using WeatherApi; 
 
 namespace OpenWeatherMapLogic.JsonModelApi;
 

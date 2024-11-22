@@ -1,12 +1,12 @@
 ﻿using OpenWeatherMapLogic;
 using OpenWeatherMapLogic.JsonModelApi;
 using Newtonsoft.Json;
-using WeatherApi_console;
+using WeatherApi;
 using DapperSqlite;
 using System.Diagnostics.Eventing.Reader;
 
 
-namespace WeatherApi_console.ConsoleOption;
+namespace WeatherApi.ConsoleOption;
 
 public class ConsoleUI : ConsoleStartOptions, IDisposable
 {

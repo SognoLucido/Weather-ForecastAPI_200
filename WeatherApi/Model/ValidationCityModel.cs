@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
-namespace WeatherApi_console.Model
+namespace WeatherApi.Model
 {
     public class ValidationCityModel
     {

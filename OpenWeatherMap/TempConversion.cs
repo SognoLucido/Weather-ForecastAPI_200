@@ -1,7 +1,7 @@
 
 
 
-namespace WeatherApi_console;
+namespace WeatherApi;
 
 public static class  TempConversion
 {
