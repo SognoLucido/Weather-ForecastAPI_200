@@ -1,9 +1,8 @@
 ﻿using OpenWeatherMapLogic;
 using OpenWeatherMapLogic.JsonModelApi;
-using Newtonsoft.Json;
-using WeatherApi;
+
 using DapperSqlite;
-using System.Diagnostics.Eventing.Reader;
+
 
 
 namespace WeatherApi.ConsoleOption;

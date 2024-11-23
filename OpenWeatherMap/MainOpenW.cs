@@ -1,6 +1,6 @@
 ﻿
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
+
 using OpenWeatherMapLogic.JsonModelApi;
 using System.Data;
 
@@ -43,38 +43,39 @@ namespace OpenWeatherMapLogic
         public async Task<List<ApiModels.City>?> GetCityInformation(string city)
         {
 
-            string url = @$"https://api.openweathermap.org/geo/1.0/direct?q={city}&appid={Apikey}";
+            //string url = @$"https://api.openweathermap.org/geo/1.0/direct?q={city}&appid={Apikey}";
 
-            string response = string.Empty;
+            //string response = string.Empty;
 
-            try
-            {
-               // HttpResponseMessage responsev2 = await _httpClient.GetAsync(url);
+            //try
+            //{
+            //   // HttpResponseMessage responsev2 = await _httpClient.GetAsync(url);
 
-                 response = await _httpClient.GetStringAsync(url);
-
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("An error occurred: " + ex.Message);
-            }
+            //     response = await _httpClient.GetStringAsync(url);
 
 
-            //  response = await _httpClient.GetStringAsync("https://api.ipify.org");
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine("An error occurred: " + ex.Message);
+            //}
 
-            if (String.IsNullOrEmpty(response))
-            {
-                await Console.Out.WriteLineAsync("something went wrong : response string is empty");
-                return null;
-            }
-            else
-            {
-               //var x = JsonConvert.DeserializeObject<List<ApiModels.City>>(response);
 
-                return JsonConvert.DeserializeObject<List<ApiModels.City>>(response);
-               
-            }
+            ////  response = await _httpClient.GetStringAsync("https://api.ipify.org");
+
+            //if (String.IsNullOrEmpty(response))
+            //{
+            //    await Console.Out.WriteLineAsync("something went wrong : response string is empty");
+            //    return null;
+            //}
+            //else
+            //{
+            //   //var x = JsonConvert.DeserializeObject<List<ApiModels.City>>(response);
+
+            //    return JsonConvert.DeserializeObject<List<ApiModels.City>>(response);
+
+            //}
+            return new();
 
         }
 
@@ -102,14 +103,16 @@ namespace OpenWeatherMapLogic
 
             //  response = await _httpClient.GetStringAsync("https://api.ipify.org");
 
-                using (apiModeltoModelconversion convMtoM = new apiModeltoModelconversion())
-                {                  
-                    CustomWeathermodel custom = convMtoM.conversion(response, City);   
-                
-                    custom.Datafrom = "Api";
-                    return custom;
+            //using (apiModeltoModelconversion convMtoM = new apiModeltoModelconversion())
+            //{                  
+            //    CustomWeathermodel custom = convMtoM.conversion(response, City);   
 
-                }
+            //    custom.Datafrom = "Api";
+            //    return custom;
+
+            //}
+
+            return new();
              
         }
 
