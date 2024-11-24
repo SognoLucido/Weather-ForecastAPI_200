@@ -1,12 +1,8 @@
 ﻿using Shared.IMeteo;
 using Shared.MeteoData.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
+using Shared.MeteoData.Models.Dto;
+using System.Text.Json;
+
 
 namespace OpenMeteoMain
 {
@@ -14,13 +10,20 @@ namespace OpenMeteoMain
     {
        private readonly HttpClient client = httpClientFactory.CreateClient();
 
-        public async Task<string> ez()
+      
+        public async Task<GeoinfoplusProvider?> GeoinfoModel(string City,string key)
         {
-            return "DA OPENMETEO";
-        }
 
-        public async Task<List<GeoinfoModel>> GeoinfoModel(string City)
-        {
+
+
+            var Request = await client.GetAsync($"https://geocoding-api.open-meteo.com/v1/search?name={City}&count=3&format=json");
+
+            var RequestTostring = await Request.Content.ReadAsStringAsync();
+
+            var datamodel = JsonSerializer.Deserialize<List<GeoinfoOpenmeteoVariant>?>(RequestTostring, GeoinfoOpenmeteoVariantSGmodel.Default.ListGeoinfoOpenmeteoVariant);
+
+            Console.WriteLine();
+
             return new();
         }
     }

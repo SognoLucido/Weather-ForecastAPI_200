@@ -8,8 +8,9 @@ using OpenWeathermapMain;
 using Scalar.AspNetCore;
 using Shared.IMeteo;
 using Shared.MeteoData.Models;
-using System.Text.Json.Serialization;
-using WeatherApi.Model;
+using Shared.MeteoData.Models.Dto;
+using System.ComponentModel.DataAnnotations;
+
 
 
 
@@ -17,7 +18,9 @@ var builder = WebApplication.CreateSlimBuilder(args);
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
-    options.SerializerOptions.TypeInfoResolverChain.Add(AppJsonSerializerContext.Default);
+    options.SerializerOptions.TypeInfoResolverChain.Add(MeteoEnumJsonSerializerContext.Default);
+    options.SerializerOptions.TypeInfoResolverChain.Add(GeoinfoResposte.Default);
+
 });
 
 //builder.Services.AddOutputCache(options =>
@@ -100,13 +103,14 @@ app.MapScalarApiReference(opt =>
 
 
 app.MapGet("/Geocoding/{City}", async (
-    string City,
+    string City,    
     MeteoService meteoservice,
     HybridCache _cache,
     IConfiguration config,
     IServiceProvider provider,
-
-    CancellationToken ct) =>
+    CancellationToken ct,
+    [Range(1,100)]int? limit = 3
+    ) =>
 {
 
 
@@ -129,7 +133,7 @@ app.MapGet("/Geocoding/{City}", async (
 
                  key = config.GetValue<string>("OpenweathermapApi:ApiKey");
 
-                if (key is null) return TypedResults.BadRequest("apikey missing(appsettings.json)");
+                if (key is null) return TypedResults.BadRequest("apikey Required check appsettings.json");
 
                 request = provider.GetKeyedService<IMeteoProvider>("openweatermap");
 
@@ -137,7 +141,7 @@ app.MapGet("/Geocoding/{City}", async (
     }
 
 
-    var result = await request.GeoinfoModel(City,null) ;
+    var result = await request.GeoinfoModel(City,key) ;
 
 
     return result is null ?  Results.NotFound() : TypedResults.Ok(result);
@@ -145,7 +149,9 @@ app.MapGet("/Geocoding/{City}", async (
     
     //return  Results.Ok(await store.ez());
 
-});
+})
+    .Produces<GeoinfoplusProvider>(200)
+    .Produces(404);
 
 
 
@@ -206,11 +212,6 @@ static async Task<string> GetDataFromTheSourceAsync(string name, CancellationTok
 
 
 
-[JsonSerializable(typeof(MeteoService))]
-[JsonSerializable(typeof(GeoinfoModel))]
-internal partial class AppJsonSerializerContext : JsonSerializerContext
-{
 
-}
 
 

@@ -10,10 +10,6 @@ namespace Shared.MeteoData.Models
    
     public class GeoinfoModel 
     {
-        //public string Name { get; set; }
-        //public string Country_Code { get; set; }
-
-        //public string? State { get; set; }
 
         public string name { get; set; }
         public double lat { get; set; }
@@ -21,4 +17,11 @@ namespace Shared.MeteoData.Models
         public string country { get; set; }
         public string? state { get; set; }
     }
+
+
+    [JsonSerializable(typeof(List<GeoinfoModel>))]
+    public partial class GeoinfolistSGmodel : JsonSerializerContext { }
+
+
+
 }

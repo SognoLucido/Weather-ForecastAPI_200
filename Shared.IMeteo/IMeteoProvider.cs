@@ -1,11 +1,13 @@
 ﻿using Shared.MeteoData.Models;
+using Shared.MeteoData.Models.Dto;
 
 namespace Shared.IMeteo
 {
    
     public interface IMeteoProvider
     {
-        Task<string> ez();
-        Task<List<GeoinfoModel>?> GeoinfoModel(string City,string? key);
+       
+        Task<GeoinfoplusProvider?> GeoinfoModel(string City,string? key);
+        
     }
 }
