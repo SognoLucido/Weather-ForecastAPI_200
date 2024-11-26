@@ -10,7 +10,7 @@ namespace OpenMeteoMain
     {
        private readonly HttpClient client = httpClientFactory.CreateClient();
 
-      
+
         public async Task<GeoinfoplusProvider?> GeoinfoModel(string City,string key)
         {
 
@@ -20,11 +20,41 @@ namespace OpenMeteoMain
 
             var RequestTostring = await Request.Content.ReadAsStringAsync();
 
-            var datamodel = JsonSerializer.Deserialize<List<GeoinfoOpenmeteoVariant>?>(RequestTostring, GeoinfoOpenmeteoVariantSGmodel.Default.ListGeoinfoOpenmeteoVariant);
+            var datamodel = JsonSerializer.Deserialize<GeoinfoOpenmeteoVariant?>(RequestTostring, GeoinfoOpenmeteoVariantSGmodel.Default.GeoinfoOpenmeteoVariant);
+
+            if (datamodel is null) return null;
+
+            var resposte = new GeoinfoplusProvider
+            {
+                MeteoProvider = MeteoService.OpenMeteo.ToString(),
+                Geoinfo = new(datamodel.results.Count)
+            };
 
             Console.WriteLine();
 
-            return new();
+            foreach(var data in datamodel.results)
+            {
+                resposte.Geoinfo.Add
+                    (
+                    new() 
+                    {
+                        country = data.country_code,
+                         lat = data.latitude,
+                         lon = data.longitude,
+                          name = data.name,
+                          state = data.admin1
+                         
+                    }
+                   
+                    );
+            }
+
+            return resposte;
+        }
+
+        Task<ForecastDto> IMeteoProvider.Forecast(double lat, double lon, string? key)
+        {
+            throw new NotImplementedException();
         }
     }
 }

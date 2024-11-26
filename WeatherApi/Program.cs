@@ -20,7 +20,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.TypeInfoResolverChain.Add(MeteoEnumJsonSerializerContext.Default);
     options.SerializerOptions.TypeInfoResolverChain.Add(GeoinfoResposte.Default);
-
+    options.SerializerOptions.TypeInfoResolverChain.Add(ForecastDtoSGmodel.Default);
 });
 
 //builder.Services.AddOutputCache(options =>
@@ -102,7 +102,7 @@ app.MapScalarApiReference(opt =>
 
 
 
-app.MapGet("/Geocoding/{City}", async (
+app.MapGet("/geocoding/{City}", async (
     string City,    
     MeteoService meteoservice,
     HybridCache _cache,
@@ -113,14 +113,6 @@ app.MapGet("/Geocoding/{City}", async (
     ) =>
 {
 
-
-
-    //IMeteoProvider? request = meteoservice switch
-    //{
-    //    MeteoService.OpenMeteo => provider.GetKeyedService<IMeteoProvider>("openmeteo"),
-    //    MeteoService.OpenWeathermap => provider.GetKeyedService<IMeteoProvider>("openweatermap")
-
-    //};
 
     IMeteoProvider? request = null;
     string? key = null;
@@ -155,6 +147,54 @@ app.MapGet("/Geocoding/{City}", async (
 
 
 
+
+
+
+app.MapGet("/forecast", async (
+    //double? lat,
+    //double? lon,
+    MeteoService meteoservice,
+    HybridCache _cache,
+    IConfiguration config,
+    IServiceProvider provider,
+    CancellationToken ct,
+    [Range(1, 100)] int? limit = 3
+    ) =>
+{
+
+
+
+    IMeteoProvider? request = null;
+    string? key = null;
+
+    switch (meteoservice)
+    {
+        case MeteoService.OpenMeteo: request = provider.GetKeyedService<IMeteoProvider>("openmeteo"); break;
+        case MeteoService.OpenWeathermap:
+            {
+
+                key = config.GetValue<string>("OpenweathermapApi:ApiKey");
+
+                if (key is null) return TypedResults.BadRequest("apikey Required check appsettings.json");
+
+                request = provider.GetKeyedService<IMeteoProvider>("openweatermap");
+
+            }; break;
+    }
+
+
+    double LAT = 44.40726;
+    double LON = 8.9338624;
+
+
+
+    var result = await request.Forecast(LAT, LON , key);
+
+    return result is null ? Results.NotFound() : TypedResults.Ok(result);
+  
+})
+    .Produces<ForecastDto>(200)
+    .Produces(404); ;
 
 
 //mt.MapGet("{City}",async (string City, HybridCache _cache,CancellationToken ct) => 
