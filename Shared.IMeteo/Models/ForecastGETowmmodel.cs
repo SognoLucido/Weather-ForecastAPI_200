@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Shared.MeteoData.Models
 {
-    public class ForecastGETmodel
+    public class ForecastGETowmmodel
     {
  
         public List<List> list { get; set; }
@@ -60,7 +60,7 @@ namespace Shared.MeteoData.Models
 }
 
 
-[JsonSerializable(typeof(ForecastGETmodel))]
+[JsonSerializable(typeof(ForecastGETowmmodel))]
 public partial class ForecastSGmodel : JsonSerializerContext { }
 
 

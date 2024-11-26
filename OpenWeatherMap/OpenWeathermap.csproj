@@ -10,10 +10,6 @@
     <ProjectReference Include="..\Shared.IMeteo\Shared.MeteoData.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
-
 
 
 </Project>

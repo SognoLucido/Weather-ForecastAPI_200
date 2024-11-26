@@ -38,11 +38,11 @@ namespace OpenWeathermapMain
 
         public async Task<ForecastDto> Forecast(double lat, double lon, string? key)
         {
-            var Request = await client.GetAsync($"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={key}");
+            var Request = await client.GetAsync($"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={key}&units=metric");
 
             var responseData = await Request.Content.ReadAsStringAsync();
 
-            var Serializ = JsonSerializer.Deserialize(responseData, ForecastSGmodel.Default.ForecastGETmodel);
+            var Serializ = JsonSerializer.Deserialize(responseData, ForecastSGmodel.Default.ForecastGETowmmodel);
 
 
             var result = MaptoForecastdto(Serializ);
@@ -61,7 +61,7 @@ namespace OpenWeathermapMain
 
 
 
-        private ForecastDto MaptoForecastdto(ForecastGETmodel model)
+        private ForecastDto MaptoForecastdto(ForecastGETowmmodel model)
         {
 
 

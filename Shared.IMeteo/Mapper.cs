@@ -12,7 +12,7 @@ namespace Shared.MeteoData
     {
 
 
-        public async static Task<ForecastDto> MaptoCustomer(this ForecastGETmodel model)
+        public async static Task<ForecastDto> MaptoCustomer(this ForecastGETowmmodel model)
         {
 
 

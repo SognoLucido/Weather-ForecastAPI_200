@@ -1,12 +1,9 @@
 ﻿
-using Dapper;
-using DapperSqlite.Model;
-using Microsoft.Extensions.Configuration;
-using OpenWeatherMapLogic.JsonModelApi;
-using System.Data.SQLite;
 
 
 namespace DapperSqlite;
+
+/*
 
 public class DataManager : IDataServiceLink
 {
@@ -168,3 +165,4 @@ public class DataManager : IDataServiceLink
 
 
 }
+*/

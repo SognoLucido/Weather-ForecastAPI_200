@@ -3,7 +3,6 @@ using DapperSqlite;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.OpenApi.Any;
 using OpenMeteoMain;
-using OpenWeatherMapLogic;
 using OpenWeathermapMain;
 using Scalar.AspNetCore;
 using Shared.IMeteo;
@@ -48,7 +47,6 @@ builder.Services.AddOpenApi(opt =>
 
 builder.Services.AddHttpClient();
 
-//builder.Services.AddControllers();
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
@@ -69,36 +67,27 @@ builder.Services.AddHybridCache(opt =>
 #pragma warning restore EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
 
-builder.Services.AddScoped<IDataServiceLink, DataManager>(); //old
-builder.Services.AddHttpClient<IServiceLink, MainOpenW>(); //old
 
 builder.Services.AddKeyedScoped<IMeteoProvider, OpenMeteo>("openmeteo");
 builder.Services.AddKeyedScoped<IMeteoProvider, OpenWeathermap>("openweatermap");
 
 
 
-
-
 var app = builder.Build();
 
-//app.UseOutputCache();
-app.MapOpenApi();/*.CacheOutput();*/
-//app.UseSwaggerUI(opt => opt.SwaggerEndpoint("/openapi/v1.json","weather api"));
+
+app.MapOpenApi();
+
 app.MapScalarApiReference(opt =>
 {
     opt.WithTitle("WeatherForecast API");
 
 
-    // opt.DefaultFonts = false;
 });
 
 
 
 //var mt = app.MapGroup("api").WithTags("MeteoAPIs");
-
-//app.MapGet("hello", () => "hello");
-
-
 
 
 
@@ -139,7 +128,7 @@ app.MapGet("/geocoding/{City}", async (
     return result is null ?  Results.NotFound() : TypedResults.Ok(result);
 
     
-    //return  Results.Ok(await store.ez());
+   
 
 })
     .Produces<GeoinfoplusProvider>(200)
@@ -169,7 +158,7 @@ app.MapGet("/forecast", async (
 
     switch (meteoservice)
     {
-        case MeteoService.OpenMeteo: request = provider.GetKeyedService<IMeteoProvider>("openmeteo"); break;
+        case MeteoService.OpenMeteo: request = provider.GetKeyedService<IMeteoProvider>("openmeteo"); break; //todo
         case MeteoService.OpenWeathermap:
             {
 
@@ -197,55 +186,18 @@ app.MapGet("/forecast", async (
     .Produces(404); ;
 
 
-//mt.MapGet("{City}",async (string City, HybridCache _cache,CancellationToken ct) => 
-//{
-//    City = "-"+City.ToLower();
-
-//    var test = _cache;
-
-
-//    //var entryOptions = new HybridCacheEntryOptions
-//    //{
-//    //    // Flags = HybridCacheEntryFlags.DisableLocalCache,
-//    //    Expiration = TimeSpan.FromMinutes(1),
-
-//    //};
-
-
-//        var x = await _cache.GetOrCreateAsync(
-//        City, // Unique key to the cache entry
-//        async cancel => await GetDataFromTheSourceAsync(City, cancel),
-//        cancellationToken: ct);
-
-
-//    return x;
-
-
-
-
-//});
-
-
-
-
-
-//app.UseResponseCaching();
-
-//app.UseAuthorization();
-
-//app.MapControllers();
 
 app.Run();
 
 
 
 
-static async Task<string> GetDataFromTheSourceAsync(string name, CancellationToken token)
-{
-    Console.WriteLine("RAW data GET");
-    string someInfo = $"someinfo-{name}";
-    return someInfo;
-}
+//static async Task<string> GetDataFromTheSourceAsync(string name, CancellationToken token)
+//{
+//    Console.WriteLine("RAW data GET");
+//    string someInfo = $"someinfo-{name}";
+//    return someInfo;
+//}
 
 
 
