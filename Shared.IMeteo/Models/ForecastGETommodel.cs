@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Shared.MeteoData.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Shared.MeteoData.Models
@@ -29,11 +31,15 @@ namespace Shared.MeteoData.Models
         public List<int> weather_code { get; set; }
     }
 
-    public class HourlyUnits
-    {
-        public string time { get; set; }
-        public string temperature_2m { get; set; }
-        public string weather_code { get; set; }
-    }
+    //public class HourlyUnits
+    //{
+    //    public string time { get; set; }
+    //    public string temperature_2m { get; set; }
+    //    public string weather_code { get; set; }
+    //}
 
 }
+
+
+[JsonSerializable(typeof(ForecastGETommodel))]
+public partial class ForecastomVariantSGmodel : JsonSerializerContext { }

@@ -1,7 +1,8 @@
 
-using DapperSqlite;
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Any;
+using Microsoft.OpenApi.Models;
 using OpenMeteoMain;
 using OpenWeathermapMain;
 using Scalar.AspNetCore;
@@ -9,6 +10,7 @@ using Shared.IMeteo;
 using Shared.MeteoData.Models;
 using Shared.MeteoData.Models.Dto;
 using System.ComponentModel.DataAnnotations;
+
 
 
 
@@ -31,6 +33,20 @@ builder.Services.Configure<RouteHandlerOptions>(o => o.ThrowOnBadRequest = false
 
 builder.Services.AddOpenApi(opt =>
 {
+
+    opt.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Info.Contact = new OpenApiContact
+        {
+            Name = "Francesco Barbano",
+            Url = new Uri("https://github.com/SognoLucido/Weather-ForecastAPI_200")
+
+        };
+        return Task.CompletedTask;
+    });
+
+
+
     opt.AddSchemaTransformer((schema, context, cancellationToken) =>
     {
         if (context.JsonTypeInfo.Type.IsEnum)
@@ -90,6 +106,11 @@ app.MapScalarApiReference(opt =>
 //var mt = app.MapGroup("api").WithTags("MeteoAPIs");
 
 
+app.MapGet("1", () =>
+{
+    return Results.BadRequest("ehhi");
+}).Produces(400);
+
 
 app.MapGet("/geocoding/{City}", async (
     string City,    
@@ -132,6 +153,7 @@ app.MapGet("/geocoding/{City}", async (
 
 })
     .Produces<GeoinfoplusProvider>(200)
+    .Produces(400,typeof(string))
     .Produces(404);
 
 
@@ -140,25 +162,27 @@ app.MapGet("/geocoding/{City}", async (
 
 
 app.MapGet("/forecast", async (
-    //double? lat,
-    //double? lon,
+    double lat,
+    double lon,
     MeteoService meteoservice,
     HybridCache _cache,
     IConfiguration config,
     IServiceProvider provider,
     CancellationToken ct,
-    [Range(1, 100)] int? limit = 3
+    int limit
     ) =>
 {
 
 
+
+    if (limit <= 0 ) return Results.BadRequest("Limit must be greater than 0." );
 
     IMeteoProvider? request = null;
     string? key = null;
 
     switch (meteoservice)
     {
-        case MeteoService.OpenMeteo: request = provider.GetKeyedService<IMeteoProvider>("openmeteo"); break; //todo
+        case MeteoService.OpenMeteo: request = provider.GetKeyedService<IMeteoProvider>("openmeteo"); break;
         case MeteoService.OpenWeathermap:
             {
 
@@ -172,18 +196,19 @@ app.MapGet("/forecast", async (
     }
 
 
-    double LAT = 44.40726;
-    double LON = 8.9338624;
+    //double LAT = 44.40726;
+    //double LON = 8.9338624;
 
 
 
-    var result = await request.Forecast(LAT, LON , key);
+    var result = await request.Forecast(lat, lon, limit, key);
 
     return result is null ? Results.NotFound() : TypedResults.Ok(result);
-  
+
 })
     .Produces<ForecastDto>(200)
-    .Produces(404); ;
+    .Produces(400)
+    .Produces(404);
 
 
 

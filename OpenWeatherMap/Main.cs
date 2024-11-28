@@ -36,7 +36,7 @@ namespace OpenWeathermapMain
 
 
 
-        public async Task<ForecastDto> Forecast(double lat, double lon, string? key)
+        public async Task<ForecastDto> Forecast(double lat, double lon,int? limit, string? key)
         {
             var Request = await client.GetAsync($"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={key}&units=metric");
 
@@ -45,8 +45,10 @@ namespace OpenWeathermapMain
             var Serializ = JsonSerializer.Deserialize(responseData, ForecastSGmodel.Default.ForecastGETowmmodel);
 
 
-            var result = MaptoForecastdto(Serializ);
+            var result = MaptoForecastdto(Serializ,limit);
 
+
+            result.MeteoProvider = MeteoService.OpenWeathermap.ToString();
             result.City = Serializ.city.name;
             result.Country_code = Serializ.city.country;
             result.lat = Serializ.city.coord.lat;
@@ -61,20 +63,13 @@ namespace OpenWeathermapMain
 
 
 
-        private ForecastDto MaptoForecastdto(ForecastGETowmmodel model)
+        private ForecastDto MaptoForecastdto(ForecastGETowmmodel model,int? limit) 
         {
-
 
             List<Data> datas = [];
 
-
-
-            bool stday = false;
-
             for (int i = 0; i < model.list.Count;)
             {
-
-
 
                 var splitter = model.list[i].dt_txt.Split(' ');
                 DateOnly testdateonly = DateOnly.Parse(splitter[0]);
@@ -124,6 +119,8 @@ namespace OpenWeathermapMain
 
                 datas.Add(data);
 
+                if(limit is not null)
+                if (datas.Count >= limit) break; 
             }
 
             return new() 

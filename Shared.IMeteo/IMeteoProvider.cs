@@ -9,7 +9,7 @@ namespace Shared.IMeteo
        
         Task<GeoinfoplusProvider?> GeoinfoModel(string City,string? key);
 
-        Task<ForecastDto> Forecast(double lat, double lon, string? key);
+        Task<ForecastDto> Forecast(double lat, double lon,int? limit, string? key);
 
 
     }

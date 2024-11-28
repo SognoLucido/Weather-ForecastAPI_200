@@ -6,8 +6,9 @@ namespace Shared.MeteoData.Models.Dto
 {
     public class ForecastDto
     {
-        public string City { get; set; }
-        public string Country_code { get; set; }
+        public string MeteoProvider { get; set; }
+        public string? City { get; set; }
+        public string? Country_code { get; set; }
         public double lat { get; set; }
         public double lon { get; set; }
         public List<Data> datas { get; set; }
