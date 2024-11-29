@@ -2,6 +2,7 @@
 using Shared.MeteoData.Models;
 using Shared.MeteoData.Models.Dto;
 using System.Text.Json;
+using WeatherApi;
 
 
 namespace OpenWeathermapMain

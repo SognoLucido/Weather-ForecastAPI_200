@@ -1,4 +1,5 @@
 
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Any;
@@ -9,6 +10,7 @@ using Scalar.AspNetCore;
 using Shared.IMeteo;
 using Shared.MeteoData.Models;
 using Shared.MeteoData.Models.Dto;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 
@@ -106,12 +108,6 @@ app.MapScalarApiReference(opt =>
 //var mt = app.MapGroup("api").WithTags("MeteoAPIs");
 
 
-app.MapGet("1", () =>
-{
-    return Results.BadRequest("ehhi");
-}).Produces(400);
-
-
 app.MapGet("/geocoding/{City}", async (
     string City,    
     MeteoService meteoservice,
@@ -122,7 +118,7 @@ app.MapGet("/geocoding/{City}", async (
     [Range(1,100)]int? limit = 3
     ) =>
 {
-
+    if (limit <= 0) return Results.BadRequest("Limit must be greater than 0.");
 
     IMeteoProvider? request = null;
     string? key = null;
@@ -152,8 +148,10 @@ app.MapGet("/geocoding/{City}", async (
    
 
 })
+    
+    .WithDescription("Get Geolocation Position: Latitude and Longitude")
     .Produces<GeoinfoplusProvider>(200)
-    .Produces(400,typeof(string))
+    .Produces<string>(400)
     .Produces(404);
 
 
@@ -169,13 +167,12 @@ app.MapGet("/forecast", async (
     IConfiguration config,
     IServiceProvider provider,
     CancellationToken ct,
-    int limit
+    int? limit
     ) =>
 {
 
 
-
-    if (limit <= 0 ) return Results.BadRequest("Limit must be greater than 0." );
+    if (limit <= 0) return Results.BadRequest("Limit must be greater than 0.");
 
     IMeteoProvider? request = null;
     string? key = null;
@@ -206,9 +203,80 @@ app.MapGet("/forecast", async (
     return result is null ? Results.NotFound() : TypedResults.Ok(result);
 
 })
+    .WithDescription("Forecast for multiple days (limited based on MeteoService and subscription tier) requires latitude and longitude")
     .Produces<ForecastDto>(200)
-    .Produces(400)
+    .Produces<string>(400)
     .Produces(404);
+
+
+
+
+
+
+app.MapGet("/oneshot/{City}", async (
+    string City,
+    MeteoService meteoservice,
+    HybridCache _cache,
+    IConfiguration config,
+    IServiceProvider provider,
+    int? limit,
+    CancellationToken ct
+    
+    ) =>
+{
+
+    if (limit <= 0) return Results.BadRequest("Limit must be greater than 0.");
+
+    IMeteoProvider? request = null;
+    string? key = null;
+
+    switch (meteoservice)
+    {
+        case MeteoService.OpenMeteo: request = provider.GetKeyedService<IMeteoProvider>("openmeteo"); break;
+        case MeteoService.OpenWeathermap:
+            {
+
+                key = config.GetValue<string>("OpenweathermapApi:ApiKey");
+
+                if (key is null) return TypedResults.BadRequest("apikey Required check appsettings.json");
+
+                request = provider.GetKeyedService<IMeteoProvider>("openweatermap");
+
+            }; break;
+    }
+
+
+
+    var Geoinfo = await request.GeoinfoModel(City, key);
+
+    if (Geoinfo is null || Geoinfo.Geoinfo?.Count < 1) return TypedResults.NotFound();
+
+
+    var result = await request.Forecast(Geoinfo.Geoinfo[0].lat, Geoinfo.Geoinfo[0].lon, limit, key);
+
+    if(result is null) return TypedResults.NotFound();
+
+    if(request is OpenMeteo)
+    {
+        result.City = Geoinfo.Geoinfo[0].name;
+        result.Country_code = Geoinfo.Geoinfo[0].country;
+    }
+    
+
+    //return result is null ? Results.NotFound() : TypedResults.Ok(result);
+
+    return Results.Ok(result);
+
+})
+    .WithDescription("Combine geolocation and forecast (results may be inaccurate *wrong city)")
+    .Produces<ForecastDto>(200)
+    .Produces<string>(400)
+    .Produces(404);
+
+
+
+
+
 
 
 
