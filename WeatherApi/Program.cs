@@ -1,6 +1,5 @@
-
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
@@ -10,8 +9,9 @@ using Scalar.AspNetCore;
 using Shared.IMeteo;
 using Shared.MeteoData.Models;
 using Shared.MeteoData.Models.Dto;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
+using WeatherApi;
 
 
 
@@ -78,11 +78,15 @@ builder.Services.AddHybridCache(opt =>
 {
     opt.DefaultEntryOptions = new HybridCacheEntryOptions
     {
-        Expiration = TimeSpan.FromMinutes(10),
-        LocalCacheExpiration = TimeSpan.FromMinutes(5)
+        //Expiration = TimeSpan.FromMinutes(10),
+        //LocalCacheExpiration = TimeSpan.FromMinutes(5)
+        Expiration = TimeSpan.FromSeconds(60),
+        LocalCacheExpiration = TimeSpan.FromSeconds(30),
     };
-});
+}).AddSerializer<GeoinfoplusProvider,JsonCachedeserializer>()
+;
 #pragma warning restore EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
 
 
 
@@ -109,27 +113,31 @@ app.MapScalarApiReference(opt =>
 
 
 app.MapGet("/geocoding/{City}", async (
-    string City,    
+    string City,
     MeteoService meteoservice,
     HybridCache _cache,
     IConfiguration config,
     IServiceProvider provider,
     CancellationToken ct,
-    [Range(1,100)]int? limit = 3
+    [Range(1, 100)] int? limit = 3
     ) =>
 {
-    if (limit <= 0) return Results.BadRequest("Limit must be greater than 0.");
+    if (limit <= 0) return Results.BadRequest("Limit must be greater than 0");
 
     IMeteoProvider? request = null;
     string? key = null;
-
+    string cachedIdProviderKey = string.Empty;
     switch (meteoservice)
     {
-        case MeteoService.OpenMeteo: request = provider.GetKeyedService<IMeteoProvider>("openmeteo"); break;
+        case MeteoService.OpenMeteo:
+            {
+                cachedIdProviderKey = "OM";
+                request = provider.GetKeyedService<IMeteoProvider>("openmeteo"); break;
+            }
         case MeteoService.OpenWeathermap:
             {
-
-                 key = config.GetValue<string>("OpenweathermapApi:ApiKey");
+                cachedIdProviderKey = "OWM";
+                key = config.GetValue<string>("OpenweathermapApi:ApiKey");
 
                 if (key is null) return TypedResults.BadRequest("apikey Required check appsettings.json");
 
@@ -139,20 +147,49 @@ app.MapGet("/geocoding/{City}", async (
     }
 
 
-    var result = await request.GeoinfoModel(City,key) ;
+        
+
+    var test = await _cache.GetOrCreateAsync(
+    $"-{cachedIdProviderKey}-{City.ToLower()}-{limit}",
+            async cancel => await request.GeoinfoModel(City, key),
+            cancellationToken: ct
+        );
 
 
-    return result is null ?  Results.NotFound() : TypedResults.Ok(result);
 
-    
-   
+
+    //var result = await request.GeoinfoModel(City, key);
+    //var x = _cache;
+
+
+
+    return test is null ? Results.NotFound() : TypedResults.Ok(test);
+
+
+
 
 })
-    
+
     .WithDescription("Get Geolocation Position: Latitude and Longitude")
     .Produces<GeoinfoplusProvider>(200)
     .Produces<string>(400)
     .Produces(404);
+
+
+
+
+
+static async Task<string?> GetDataFromTheSourceAsync(string name, CancellationToken token)
+{
+    Console.WriteLine("RAW data GET");
+    string someInfo = $"someinfo-{name}";
+
+
+
+    return null;
+}
+
+
 
 
 
@@ -172,7 +209,7 @@ app.MapGet("/forecast", async (
 {
 
 
-    if (limit <= 0) return Results.BadRequest("Limit must be greater than 0.");
+    if (limit <= 0) return Results.BadRequest("Limit must be greater than 0");
 
     IMeteoProvider? request = null;
     string? key = null;
@@ -221,11 +258,11 @@ app.MapGet("/oneshot/{City}", async (
     IServiceProvider provider,
     int? limit,
     CancellationToken ct
-    
+
     ) =>
 {
 
-    if (limit <= 0) return Results.BadRequest("Limit must be greater than 0.");
+    if (limit <= 0) return Results.BadRequest("Limit must be greater than 0");
 
     IMeteoProvider? request = null;
     string? key = null;
@@ -254,14 +291,14 @@ app.MapGet("/oneshot/{City}", async (
 
     var result = await request.Forecast(Geoinfo.Geoinfo[0].lat, Geoinfo.Geoinfo[0].lon, limit, key);
 
-    if(result is null) return TypedResults.NotFound();
+    if (result is null) return TypedResults.NotFound();
 
-    if(request is OpenMeteo)
+    if (request is OpenMeteo)
     {
         result.City = Geoinfo.Geoinfo[0].name;
         result.Country_code = Geoinfo.Geoinfo[0].country;
     }
-    
+
 
     //return result is null ? Results.NotFound() : TypedResults.Ok(result);
 
