@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace WeatherApi
 {
-    public class JsonCachedeserializer : IHybridCacheSerializer<GeoinfoplusProvider>
+    public  class GeoinfoSerializer : IHybridCacheSerializer<GeoinfoplusProvider>
     {
 
 
@@ -15,7 +15,7 @@ namespace WeatherApi
             var jsonBytes = source.ToArray();
 
             var test = JsonSerializer.Deserialize(jsonBytes, GeoinfoResposte.Default.GeoinfoplusProvider);
-            //throw new NotImplementedException();
+
 
             return test ;
         }
@@ -25,9 +25,35 @@ namespace WeatherApi
             using var writer = new Utf8JsonWriter(target);
 
             JsonSerializer.Serialize(writer, value, GeoinfoResposte.Default.GeoinfoplusProvider);
-            //throw new NotImplementedException();
+
 
             writer.Flush();
         }
     }
+
+
+    public class ForecastSerializer : IHybridCacheSerializer<ForecastDto>
+    {
+        public ForecastDto Deserialize(ReadOnlySequence<byte> source)
+        {
+            var jsonBytes = source.ToArray();
+
+            var test = JsonSerializer.Deserialize(jsonBytes, ForecastDtoSGmodel.Default.ForecastDto);
+
+
+            return test;
+        }
+
+        public void Serialize(ForecastDto value, IBufferWriter<byte> target)
+        {
+            using var writer = new Utf8JsonWriter(target);
+
+            JsonSerializer.Serialize(writer, value, ForecastDtoSGmodel.Default.ForecastDto);
+
+
+            writer.Flush();
+        }
+    }
+
+
 }

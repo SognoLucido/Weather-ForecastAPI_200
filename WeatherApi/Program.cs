@@ -83,8 +83,9 @@ builder.Services.AddHybridCache(opt =>
         Expiration = TimeSpan.FromSeconds(60),
         LocalCacheExpiration = TimeSpan.FromSeconds(30),
     };
-}).AddSerializer<GeoinfoplusProvider,JsonCachedeserializer>()
-;
+})
+.AddSerializer<GeoinfoplusProvider,GeoinfoSerializer>()
+.AddSerializer<ForecastDto,ForecastSerializer>();
 #pragma warning restore EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
 
@@ -103,16 +104,16 @@ app.MapOpenApi();
 app.MapScalarApiReference(opt =>
 {
     opt.WithTitle("WeatherForecast API");
-
+   
 
 });
 
 
 
-//var mt = app.MapGroup("api").WithTags("MeteoAPIs");
+var mt = app.MapGroup("api").WithTags("MeteoAPIs");
 
 
-app.MapGet("/geocoding/{City}", async (
+mt.MapGet("/geocoding/{City}", async (
     string City,
     MeteoService meteoservice,
     HybridCache _cache,
@@ -179,24 +180,24 @@ app.MapGet("/geocoding/{City}", async (
 
 
 
-static async Task<string?> GetDataFromTheSourceAsync(string name, CancellationToken token)
-{
-    Console.WriteLine("RAW data GET");
-    string someInfo = $"someinfo-{name}";
+//static async Task<string?> GetDataFromTheSourceAsync(string name, CancellationToken token)
+//{
+//    Console.WriteLine("RAW data GET");
+//    string someInfo = $"someinfo-{name}";
 
 
 
-    return null;
-}
-
-
-
-
+//    return null;
+//}
 
 
 
 
-app.MapGet("/forecast", async (
+
+
+
+
+mt.MapGet("/forecast", async (
     double lat,
     double lon,
     MeteoService meteoservice,
@@ -207,19 +208,23 @@ app.MapGet("/forecast", async (
     int? limit
     ) =>
 {
-
+   
 
     if (limit <= 0) return Results.BadRequest("Limit must be greater than 0");
 
     IMeteoProvider? request = null;
     string? key = null;
-
+    string cachedIdProviderKey = string.Empty;
     switch (meteoservice)
     {
-        case MeteoService.OpenMeteo: request = provider.GetKeyedService<IMeteoProvider>("openmeteo"); break;
+        case MeteoService.OpenMeteo:
+            {
+                cachedIdProviderKey = "OM";
+                request = provider.GetKeyedService<IMeteoProvider>("openmeteo"); break;
+            }
         case MeteoService.OpenWeathermap:
             {
-
+                cachedIdProviderKey = "OWM";
                 key = config.GetValue<string>("OpenweathermapApi:ApiKey");
 
                 if (key is null) return TypedResults.BadRequest("apikey Required check appsettings.json");
@@ -233,9 +238,18 @@ app.MapGet("/forecast", async (
     //double LAT = 44.40726;
     //double LON = 8.9338624;
 
+    lat = Math.Truncate(lat * 100) / 100;
+    lon = Math.Truncate(lon * 100) / 100;
 
 
-    var result = await request.Forecast(lat, lon, limit, key);
+    var result = await _cache.GetOrCreateAsync(
+ $"-{cachedIdProviderKey}-{lat}-{lon}-{limit}",
+         async cancel => await request.Forecast(lat, lon, limit, key),
+         cancellationToken: ct
+     );
+
+
+    //var result = await request.Forecast(lat, lon, limit, key);
 
     return result is null ? Results.NotFound() : TypedResults.Ok(result);
 
@@ -250,7 +264,7 @@ app.MapGet("/forecast", async (
 
 
 
-app.MapGet("/oneshot/{City}", async (
+mt.MapGet("/oneshot/{City}", async (
     string City,
     MeteoService meteoservice,
     HybridCache _cache,
@@ -266,13 +280,17 @@ app.MapGet("/oneshot/{City}", async (
 
     IMeteoProvider? request = null;
     string? key = null;
-
+    string cachedIdProviderKey = string.Empty;
     switch (meteoservice)
     {
-        case MeteoService.OpenMeteo: request = provider.GetKeyedService<IMeteoProvider>("openmeteo"); break;
+        case MeteoService.OpenMeteo:
+            {
+                cachedIdProviderKey = "OM";
+                request = provider.GetKeyedService<IMeteoProvider>("openmeteo"); break;
+            }
         case MeteoService.OpenWeathermap:
             {
-
+                cachedIdProviderKey = "OWM";
                 key = config.GetValue<string>("OpenweathermapApi:ApiKey");
 
                 if (key is null) return TypedResults.BadRequest("apikey Required check appsettings.json");
@@ -282,14 +300,32 @@ app.MapGet("/oneshot/{City}", async (
             }; break;
     }
 
+    var Geoinfo = await _cache.GetOrCreateAsync(
+   $"-{cachedIdProviderKey}-{City.ToLower()}-{limit}",
+           async cancel => await request.GeoinfoModel(City, key),
+           cancellationToken: ct
+       );
 
 
-    var Geoinfo = await request.GeoinfoModel(City, key);
+    //var Geoinfo = await request.GeoinfoModel(City, key);
 
     if (Geoinfo is null || Geoinfo.Geoinfo?.Count < 1) return TypedResults.NotFound();
 
 
-    var result = await request.Forecast(Geoinfo.Geoinfo[0].lat, Geoinfo.Geoinfo[0].lon, limit, key);
+  var lat = Math.Truncate(Geoinfo.Geoinfo[0].lat * 100) / 100;
+   var lon = Math.Truncate(Geoinfo.Geoinfo[0].lon * 100) / 100;
+
+
+    var result = await _cache.GetOrCreateAsync(
+$"-{cachedIdProviderKey}-{lat}-{lon}-{limit}",
+        async cancel => await request.Forecast(lat, lon, limit, key),
+        cancellationToken: ct
+    );
+
+
+    //var result = await request.Forecast(Geoinfo.Geoinfo[0].lat, Geoinfo.Geoinfo[0].lon, limit, key);
+
+
 
     if (result is null) return TypedResults.NotFound();
 
@@ -315,19 +351,9 @@ app.MapGet("/oneshot/{City}", async (
 
 
 
-
-
 app.Run();
 
 
-
-
-//static async Task<string> GetDataFromTheSourceAsync(string name, CancellationToken token)
-//{
-//    Console.WriteLine("RAW data GET");
-//    string someInfo = $"someinfo-{name}";
-//    return someInfo;
-//}
 
 
 
