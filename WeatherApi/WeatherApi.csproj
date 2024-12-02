@@ -20,10 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HistoricalWeather\HistoricalWeather.csproj" />
     <ProjectReference Include="..\OpenMeteo\OpenMeteo.csproj" />
     <ProjectReference Include="..\OpenWeathermap\OpenWeathermap.csproj" />
     <ProjectReference Include="..\Shared.IMeteo\Shared.MeteoData.csproj" />
-    <ProjectReference Include="..\Sqlitedb\Sqlitedb.csproj" />
   </ItemGroup>
 
 </Project>

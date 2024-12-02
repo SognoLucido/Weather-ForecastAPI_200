@@ -1,3 +1,4 @@
+using HistoricalWeather;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -26,6 +27,8 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolverChain.Add(ForecastDtoSGmodel.Default);
 });
 
+builder.Services.AddHostedService<HistoricalWeatherBGservice>();
+builder.Services.AddSingleton<DBservice>();
 //builder.Services.AddOutputCache(options =>
 //{
 //    options.AddBasePolicy(policy => policy.Expire(TimeSpan.FromMinutes(10)));
@@ -110,6 +113,9 @@ app.MapScalarApiReference(opt =>
 
 
 
+
+
+
 var mt = app.MapGroup("api").WithTags("MeteoAPIs");
 
 
@@ -148,7 +154,7 @@ mt.MapGet("/geocoding/{City}", async (
     }
 
 
-        
+       
 
     var test = await _cache.GetOrCreateAsync(
     $"-{cachedIdProviderKey}-{City.ToLower()}-{limit}",
