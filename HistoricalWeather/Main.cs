@@ -1,13 +1,19 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using HistoricalWeather.Sqlite;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Shared.IMeteo;
+using Shared.MeteoData.Models;
+using System;
 using System.Timers;
 
 
 namespace HistoricalWeather
 {
-    public class HistoricalWeatherBGservice : BackgroundService
+    public class Main : BackgroundService
     {
         private static System.Timers.Timer aTimer;
+       
         TimeOnly Time;
         bool? isEnabled;
         readonly DBservice dbcall;
@@ -17,7 +23,9 @@ namespace HistoricalWeather
         private static bool Onetime;
         private static TimeSpan Timerange  = TimeSpan.FromSeconds(10); // the histodb will fetch data every this , from Time(startdate)
         private TimeSpan OffsetFromSettingsTime;
-        public HistoricalWeatherBGservice
+        private MeteoService? meteoService;
+
+        public Main
             (
             IConfiguration config,
             DBservice _dbcall
@@ -26,6 +34,17 @@ namespace HistoricalWeather
             dbcall = _dbcall;
             isEnabled = config["Historicaldb:Enabled"]?.ConvertstrtoB() ?? false;
 
+            switch (config["Historicaldb:MeteoProvider"])
+            {
+                case "OM": meteoService = MeteoService.OpenMeteo;  break;
+                case "OWM": meteoService = MeteoService.OpenWeathermap; break;
+                    default: 
+                    { 
+                        isEnabled = false;
+                        return; 
+                    }
+            }
+
             if (!TimeOnly.TryParse(config["Historicaldb:TimeToFetch"], out Time)) { isEnabled = false; }
 
             var geolat = config.GetSection("Historicaldb:GeolocationsLat");
@@ -33,6 +52,7 @@ namespace HistoricalWeather
 
             connstr = config["Historicaldb:Sqlite"];
             if (connstr is null) isEnabled = false;
+
 
             try
             {
@@ -117,13 +137,12 @@ namespace HistoricalWeather
             while (!stoppingToken.IsCancellationRequested)
             {
 
+                dbcall.Connstring = connstr;
+
+               await dbcall.Init();
+               
                 TimerSetup(OffsetFromSettingsTime);
-
-
                 await Task.Delay(-1, stoppingToken);
-
-                //Console.WriteLine("Hello");
-                //await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
 
             }
 
@@ -131,24 +150,27 @@ namespace HistoricalWeather
 
         }
 
-        private static void OnTimedEvent(Object? source, ElapsedEventArgs e)
+
+
+
+        private async  void OnTimedEvent(Object? source, ElapsedEventArgs e)
         {
+
             if (!Onetime)
             {
                 Tdispose();
                 TimerSetup(Timerange);
             }
 
+            await dbcall.Fetchdata(lat, lot, meteoService);
+
             Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}", e.SignalTime);
-
-
-
 
         }
 
 
 
-        private static void TimerSetup(TimeSpan pep)
+        private  void TimerSetup(TimeSpan pep)
         {
             aTimer = new System.Timers.Timer(pep);
             aTimer.Elapsed += OnTimedEvent;
@@ -167,10 +189,12 @@ namespace HistoricalWeather
         }
 
 
+      
+
+
+
+
 
 
     }
-
-    //private bool convert(this string cv) => cv.ToLower() == "true" ?  true : false;
-
 }

@@ -1,4 +1,5 @@
 using HistoricalWeather;
+using HistoricalWeather.Sqlite;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -27,7 +28,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolverChain.Add(ForecastDtoSGmodel.Default);
 });
 
-builder.Services.AddHostedService<HistoricalWeatherBGservice>();
+builder.Services.AddHostedService<HistoricalWeather.Main>();
 builder.Services.AddSingleton<DBservice>();
 //builder.Services.AddOutputCache(options =>
 //{
