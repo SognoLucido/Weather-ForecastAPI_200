@@ -8,18 +8,15 @@ using System.Threading.Tasks;
 
 namespace Shared.MeteoData
 {
-    public static  class Mapper
-    {
+    //public static  class Mapper
+    //{
 
 
-        public async static Task<ForecastDto> MaptoCustomer(this ForecastGETowmmodel model)
-        {
+    //    public async static Task<ForecastDto> MaptoCustomer(this ForecastGETowmmodel model)
+    //    {
 
 
-
-
-
-            return new();
-        }
-    }
+    //        return new();
+    //    }
+    //}
 }

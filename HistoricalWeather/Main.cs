@@ -23,7 +23,7 @@ namespace HistoricalWeather
         private static bool Onetime;
         private static TimeSpan Timerange  = TimeSpan.FromSeconds(10); // the histodb will fetch data every this , from Time(startdate)
         private TimeSpan OffsetFromSettingsTime;
-        private MeteoService? meteoService;
+        private MeteoService meteoService;
 
         public Main
             (
@@ -45,7 +45,10 @@ namespace HistoricalWeather
                     }
             }
 
-            if (!TimeOnly.TryParse(config["Historicaldb:TimeToFetch"], out Time)) { isEnabled = false; }
+            // if (!TimeOnly.TryParse(config["Historicaldb:TimeToFetch"], out Time)) { isEnabled = false; }
+            Time = new TimeOnly(23,26); //time to start fetching after startup
+
+
 
             var geolat = config.GetSection("Historicaldb:GeolocationsLat");
             var geolot = config.GetSection("Historicaldb:GeolocationsLot");
@@ -137,10 +140,14 @@ namespace HistoricalWeather
             while (!stoppingToken.IsCancellationRequested)
             {
 
-                dbcall.Connstring = connstr;
+                dbcall.Connstring = connstr ?? throw new NotImplementedException("Connstring missing");
 
-               await dbcall.Init();
-               
+                //await dbcall.Init();
+
+                ////temp 
+                //await dbcall.Fetchdata(lat, lot, meteoService);
+
+
                 TimerSetup(OffsetFromSettingsTime);
                 await Task.Delay(-1, stoppingToken);
 
@@ -154,7 +161,7 @@ namespace HistoricalWeather
 
 
         private async  void OnTimedEvent(Object? source, ElapsedEventArgs e)
-        {
+         {
 
             if (!Onetime)
             {

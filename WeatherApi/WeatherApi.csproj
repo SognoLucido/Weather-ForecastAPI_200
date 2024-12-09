@@ -26,10 +26,4 @@
     <ProjectReference Include="..\Shared.IMeteo\Shared.MeteoData.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="historicwt.db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>
