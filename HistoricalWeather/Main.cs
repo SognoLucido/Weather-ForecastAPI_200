@@ -14,14 +14,14 @@ namespace HistoricalWeather
     {
         private static System.Timers.Timer aTimer;
        
-        TimeOnly Time;
+        TimeOnly TimeToreach;
         bool? isEnabled;
         readonly DBservice dbcall;
         double[]? lat;
         double[]? lot;
         string? connstr;
         private static bool Onetime;
-        private static TimeSpan Timerange  = TimeSpan.FromSeconds(10); // the histodb will fetch data every this , from Time(startdate)
+        private static TimeSpan Timerange  = TimeSpan.FromDays(1); // the histodb will fetch data every this , from Time(startdate)
         private TimeSpan OffsetFromSettingsTime;
         private MeteoService meteoService;
 
@@ -46,7 +46,7 @@ namespace HistoricalWeather
             }
 
             // if (!TimeOnly.TryParse(config["Historicaldb:TimeToFetch"], out Time)) { isEnabled = false; }
-            Time = new TimeOnly(23,26); //time to start fetching after startup
+            TimeToreach = new TimeOnly(00,00); //time to start fetching after startup
 
 
 
@@ -94,55 +94,62 @@ namespace HistoricalWeather
             }
 
             dbcall.Connstring = connstr;
-            DateTime offsetcalc = DateTime.Now;
+            DateTime now = DateTime.Now;
            
 
-            if (offsetcalc.Hour <= Time.Hour && offsetcalc.Minute < Time.Minute)
+            if (now.Hour <= TimeToreach.Hour && now.Minute < TimeToreach.Minute)
             {
 
-                offsetcalc =
+                now =
                     new DateTime
                         (
-                        offsetcalc.Year,
-                        offsetcalc.Month,
-                        offsetcalc.Day,
-                        Time.Hour,
-                        Time.Minute,
+                        now.Year,
+                        now.Month,
+                        now.Day,
+                        TimeToreach.Hour,
+                        TimeToreach.Minute,
                         0
                        );
 
 
-                OffsetFromSettingsTime = offsetcalc - DateTime.Now;
+                OffsetFromSettingsTime = now - DateTime.Now;
 
 
             }
             else 
             {
-                offsetcalc =
+
+              
+
+
+               DateTime pep =
                     new DateTime
                         (
-                        offsetcalc.Year,
-                        offsetcalc.Month,
-                        offsetcalc.Day,
-                        Time.Hour,
-                        Time.Minute,
-                        0
+                        now.Year,
+                        now.Month,
+                        now.Day,
+                        TimeToreach.Hour,
+                        TimeToreach.Minute,
+                        0  
                        );
-                offsetcalc.AddDays(1);
 
-                OffsetFromSettingsTime = offsetcalc - DateTime.Now;
+                pep = pep.AddDays(1);
+
+                OffsetFromSettingsTime = pep - now;
+
+         
             }
 
 
 
-            //offsetcalc.Hour = 
+            
 
             while (!stoppingToken.IsCancellationRequested)
             {
 
                 dbcall.Connstring = connstr ?? throw new NotImplementedException("Connstring missing");
 
-                //await dbcall.Init();
+                await dbcall.Init();
 
                 ////temp 
                 //await dbcall.Fetchdata(lat, lot, meteoService);
