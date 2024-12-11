@@ -6,7 +6,8 @@
 - ASP.NET Core Web API
 - .net9
 - aot
-- HybridCache 
+- HybridCache
+- Redis
 - Scalar
 - dapper-sqlite
 - Minimal api
