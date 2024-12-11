@@ -1,6 +1,7 @@
 using HistoricalWeather;
 using HistoricalWeather.Sqlite;
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Any;
@@ -11,6 +12,7 @@ using Scalar.AspNetCore;
 using Shared.IMeteo;
 using Shared.MeteoData.Models;
 using Shared.MeteoData.Models.Dto;
+using StackExchange.Redis;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using WeatherApi;
@@ -72,20 +74,33 @@ builder.Services.AddHttpClient();
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+
+    var config = new ConfigurationOptions
+    {
+        EndPoints = { builder.Configuration.GetConnectionString("Redis")! }, 
+        ConnectTimeout = 1000,           
+        SyncTimeout = 1000,              
+  
+    };
+
+   options.ConfigurationOptions = config;
+
     options.InstanceName = "weather";
+
 
 });
 
 #pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 builder.Services.AddHybridCache(opt =>
 {
+
     opt.DefaultEntryOptions = new HybridCacheEntryOptions
     {
         //Expiration = TimeSpan.FromMinutes(10),
         //LocalCacheExpiration = TimeSpan.FromMinutes(5)
-        Expiration = TimeSpan.FromSeconds(60),
-        LocalCacheExpiration = TimeSpan.FromSeconds(30),
+        Expiration = TimeSpan.FromHours(3),
+        LocalCacheExpiration = TimeSpan.FromHours(1),
+         
     };
 })
 .AddSerializer<GeoinfoplusProvider,GeoinfoSerializer>()
@@ -108,8 +123,7 @@ app.MapOpenApi();
 app.MapScalarApiReference(opt =>
 {
     opt.WithTitle("WeatherForecast API");
-   
-
+    opt.AddServer("http://localhost:8080");
 });
 
 

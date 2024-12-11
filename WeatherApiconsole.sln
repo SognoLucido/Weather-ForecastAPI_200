@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.MeteoData", "Shared.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HistoricalWeather", "HistoricalWeather\HistoricalWeather.csproj", "{2197E02C-5CB8-43FB-B53F-338F45EA3B60}"
 EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{434CF312-8848-4EA4-83D6-0E3F74D1B470}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{2197E02C-5CB8-43FB-B53F-338F45EA3B60}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2197E02C-5CB8-43FB-B53F-338F45EA3B60}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2197E02C-5CB8-43FB-B53F-338F45EA3B60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{434CF312-8848-4EA4-83D6-0E3F74D1B470}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{434CF312-8848-4EA4-83D6-0E3F74D1B470}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{434CF312-8848-4EA4-83D6-0E3F74D1B470}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{434CF312-8848-4EA4-83D6-0E3F74D1B470}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

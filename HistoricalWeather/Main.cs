@@ -13,12 +13,12 @@ namespace HistoricalWeather
     public class Main : BackgroundService
     {
         private static System.Timers.Timer aTimer;
-       
-        TimeOnly TimeToreach;
+
+        TimeOnly TimeToreach = new TimeOnly(00, 00); //time to start fetching after startup . UTC only ;
         bool? isEnabled;
         readonly DBservice dbcall;
         double[]? lat;
-        double[]? lot;
+        double[]? lon;
         string? connstr;
         private static bool Onetime;
         private static TimeSpan Timerange  = TimeSpan.FromDays(1); // the histodb will fetch data every this , from Time(startdate)
@@ -46,12 +46,11 @@ namespace HistoricalWeather
             }
 
             // if (!TimeOnly.TryParse(config["Historicaldb:TimeToFetch"], out Time)) { isEnabled = false; }
-            TimeToreach = new TimeOnly(00,00); //time to start fetching after startup
 
 
 
             var geolat = config.GetSection("Historicaldb:GeolocationsLat");
-            var geolot = config.GetSection("Historicaldb:GeolocationsLot");
+            var geolot = config.GetSection("Historicaldb:GeolocationsLon");
 
             connstr = config["Historicaldb:Sqlite"];
             if (connstr is null) isEnabled = false;
@@ -67,14 +66,14 @@ namespace HistoricalWeather
                     .Select(s => double.Parse(s.Value))
                     .ToArray();
 
-                lot = (double[]?)geolot
+                lon = (double[]?)geolot
                    .AsEnumerable()
                    .Where(w => w.Value is not null)
                    .Select(s => double.Parse(s.Value))
                    .ToArray();
 
 
-                if (lat is null || lot is null || (lat.Length != lot.Length)) throw new FormatException("invalid appsettings: Geolocalist");
+                if (lat is null || lon is null || (lat.Length != lon.Length)) throw new FormatException("invalid appsettings: Geolocalist");
 
             }
             catch (Exception ex)
@@ -94,9 +93,9 @@ namespace HistoricalWeather
             }
 
             dbcall.Connstring = connstr;
-            DateTime now = DateTime.Now;
-           
 
+            DateTime now = DateTime.UtcNow;
+           
             if (now.Hour <= TimeToreach.Hour && now.Minute < TimeToreach.Minute)
             {
 
@@ -112,7 +111,7 @@ namespace HistoricalWeather
                        );
 
 
-                OffsetFromSettingsTime = now - DateTime.Now;
+                OffsetFromSettingsTime = now - DateTime.UtcNow;
 
 
             }
@@ -152,7 +151,7 @@ namespace HistoricalWeather
                 await dbcall.Init();
 
                 ////temp 
-                //await dbcall.Fetchdata(lat, lot, meteoService);
+                //await dbcall.Fetchdata(lat, lon, meteoService);
 
 
                 TimerSetup(OffsetFromSettingsTime);
@@ -176,7 +175,7 @@ namespace HistoricalWeather
                 TimerSetup(Timerange);
             }
 
-            await dbcall.Fetchdata(lat, lot, meteoService);
+            await dbcall.Fetchdata(lat, lon, meteoService);
 
             Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}", e.SignalTime);
 

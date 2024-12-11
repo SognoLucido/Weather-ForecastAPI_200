@@ -9,6 +9,7 @@
 	  <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 	  <UserSecretsId>38bfb0b5-1a08-4c0a-9ac4-91a781dfcefd</UserSecretsId>
 	  <SignAssembly>False</SignAssembly>
+	  <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +17,7 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="9.0.0-preview.9.24556.5" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
-    <PackageReference Include="Scalar.AspNetCore" Version="1.2.45" />
+    <PackageReference Include="Scalar.AspNetCore" Version="1.2.51" />
   </ItemGroup>
 
   <ItemGroup>

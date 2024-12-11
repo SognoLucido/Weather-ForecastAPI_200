@@ -61,61 +61,6 @@ namespace HistoricalWeather.Sqlite
                     await db.ExecuteAsync(ForecastDetails);
 
 
-
-                    //   var test = $@"
-                    //INSERT INTO {Tables.MeteoId} (Date, Lat, Lon, Provider)
-                    //VALUES (@Date, @Lat, @Lon, @Provider)";
-
-
-
-
-
-                    var parameters = new
-                    {
-                        Date = new DateOnly(1111, 11, 11),
-                        Lat = 1.0,
-                        Lon = 1.0,
-                        //Provider = "PEPPO"
-                    };
-
-
-
-                    //var id = await db.ExecuteAsync(test,parameters);
-                    //var id = await db.ExecuteAsync(test, new
-                    //{
-                    //    Date = new DateOnly(2666, 2, 12),
-                    //    Lat = 23.3,
-                    //    Lon = 2.3,
-                    //    Provider = "PEPPO"
-                    //});
-
-
-                    /////search             
-                    //var checkexist = $"SELECT Id FROM {Tables.MeteoInfo} WHERE Date = @Date AND Lat = @Lat AND Lon = @Lon;";
-
-                    //var existingId = await db.QueryFirstOrDefaultAsync<int?>(checkexist, parameters);
-
-                    var insertdetails = $"INSERT INTO {Tables.Details} (MeteoId ,Time, Description) VALUES (@MeteoId,@Time ,@Description ) ";
-
-                    //if (existingId is not null)
-                    //{
-
-                    //    //var list = new List<object>
-                    //    //{
-                    //    //    new { MeteoId = existingId , Time = new TimeOnly(12, 3).ToString(), Description = "PEPPO1" },
-                    //    //    new { MeteoId = existingId , Time = new TimeOnly(18, 2).ToString(), Description = "PEPPO2" },
-                    //    //    new { MeteoId = existingId, Time = new TimeOnly(19, 2).ToString(), Description = "PEPPO3" }
-                    //    //};
-
-
-                    //    //var list = new { MeteoId = existingId, Time = new TimeOnly(12, 3), Description = "PEPPO1" };
-
-                    //  var test =  await db.ExecuteAsync(insertdetails,new { MeteoId = existingId, Time = new TimeOnly(13, 3), Description = "PEPPO1" });
-
-
-                    //}
-
-
                 }
             }
             catch (Exception ex)
@@ -178,9 +123,6 @@ namespace HistoricalWeather.Sqlite
             var checkexist = $"SELECT Id FROM {Tables.MeteoInfo} WHERE Date = @Date AND Lat = @Lat AND Lon = @Lon AND Provider = @Provider ;";
 
 
-
-
-
            
             using (var db = new SqliteConnection(Connstring))
             {
@@ -216,9 +158,7 @@ namespace HistoricalWeather.Sqlite
                         var Maininsertsql =
                             $"INSERT INTO {Tables.MeteoInfo} (Date,Lat,Lon,Provider)" +
                             $"VALUES (@Date,@Lat,@Lon,@Provider);" +
-                            $"SELECT last_insert_rowid();\"";
-
-                       
+                            $"SELECT last_insert_rowid();";
 
 
                         var id = await db.ExecuteScalarAsync(Maininsertsql,
