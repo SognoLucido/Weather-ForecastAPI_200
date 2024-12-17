@@ -1,5 +1,6 @@
 using HistoricalWeather;
 using HistoricalWeather.Sqlite;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,7 @@ using OpenMeteoMain;
 using OpenWeathermapMain;
 using Scalar.AspNetCore;
 using Shared.IMeteo;
+using Shared.MeteoData;
 using Shared.MeteoData.Models;
 using Shared.MeteoData.Models.Dto;
 using StackExchange.Redis;
@@ -69,7 +71,19 @@ builder.Services.AddOpenApi(opt =>
     });
 });
 
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("DefaultClient", client =>
+{
+    //Base3rdApiUrls.GETGeocodingOpenApi = "https://geocoding-api.open-meteo.com/v1/";
+    //Base3rdApiUrls.GETForecastOpenApi = "https://api.open-meteo.com/v1/";
+});
+
+builder.Services.AddSingleton(opt =>
+{
+  
+
+    return new Testurls("https://geocoding-api.open-meteo.com/v1/");
+});
+
 
 
 builder.Services.AddStackExchangeRedisCache(options =>
@@ -145,6 +159,7 @@ mt.MapGet("/geocoding/{City}", async (
     ) =>
 {
     if (limit <= 0) return Results.BadRequest("Limit must be greater than 0");
+    if (City == "{City}") return Results.BadRequest("Insert a City");
 
     IMeteoProvider? request = null;
     string? key = null;
@@ -169,15 +184,14 @@ mt.MapGet("/geocoding/{City}", async (
     }
 
 
-       
-
+    
     var test = await _cache.GetOrCreateAsync(
     $"-{cachedIdProviderKey}-{City.ToLower()}-{limit}",
             async cancel => await request.GeoinfoModel(City, key),
             cancellationToken: ct
         );
 
-
+ 
 
 
     //var result = await request.GeoinfoModel(City, key);
@@ -377,7 +391,7 @@ app.Run();
 
 
 
-
+public partial class Program { }
 
 
 

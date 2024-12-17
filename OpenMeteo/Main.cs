@@ -2,6 +2,7 @@
 
 using OpenMeteoMain.Model;
 using Shared.IMeteo;
+using Shared.MeteoData;
 using Shared.MeteoData.Models;
 using Shared.MeteoData.Models.Dto;
 using System.Text.Json;
@@ -9,23 +10,32 @@ using System.Text.Json;
 
 namespace OpenMeteoMain;
 
-public class OpenMeteo(IHttpClientFactory httpClientFactory) : IMeteoProvider
+public class OpenMeteo : IMeteoProvider
 {
-    private readonly HttpClient client = httpClientFactory.CreateClient();
+    private readonly HttpClient client;
+    private readonly Testurls testurls1;
 
+
+    public OpenMeteo(IHttpClientFactory httpClientFactory ,Testurls testurls)
+    {
+       client = httpClientFactory.CreateClient("DefaultClient");
+        testurls1 = testurls;
+       
+    }
 
     public async Task<GeoinfoplusProvider?> GeoinfoModel(string City, string key)
     {
 
 
 
-        var Request = await client.GetAsync($"https://geocoding-api.open-meteo.com/v1/search?name={City}&count=3&format=json");
+        var Request = await client.GetAsync($"{testurls1.GETGeocodingOpenApi}/search?name={City}&count=3&format=json");
 
+        //var Request = await client.GetAsync($"{testurls1.GETGeocodingOpenApi}/search?");
         var RequestTostring = await Request.Content.ReadAsStringAsync();
 
         var datamodel = JsonSerializer.Deserialize<GeoinfoOpenmeteoVariant?>(RequestTostring, GeoinfoOpenmeteoVariantSGmodel.Default.GeoinfoOpenmeteoVariant);
 
-        if (datamodel is null) return null;
+        if (datamodel.results is null) return null;
 
         var resposte = new GeoinfoplusProvider
         {

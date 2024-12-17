@@ -13,7 +13,7 @@
 - Minimal api
 - MeteoProviders : openweathermap & open-meteo
 - docker / compose 
-- xunit  (todo)
+- xunit - wiremock  (todo)
 - standalone console Only project (todo)
 
 #
