@@ -71,17 +71,19 @@ builder.Services.AddOpenApi(opt =>
     });
 });
 
-builder.Services.AddHttpClient("DefaultClient", client =>
-{
-    //Base3rdApiUrls.GETGeocodingOpenApi = "https://geocoding-api.open-meteo.com/v1/";
-    //Base3rdApiUrls.GETForecastOpenApi = "https://api.open-meteo.com/v1/";
-});
+builder.Services.AddHttpClient();
 
+
+//as interface . todo ?!? 
 builder.Services.AddSingleton(opt =>
 {
-  
+    var GETGeoInfoOM = "https://geocoding-api.open-meteo.com/v1/";
+    var GETGeoInfoOWM = "https://api.openweathermap.org/geo/1.0/";
 
-    return new Testurls("https://geocoding-api.open-meteo.com/v1/");
+    var GETForecastOM = "https://api.open-meteo.com/v1/";
+    var GETForecastOWM = "https://api.openweathermap.org/data/2.5/";
+
+    return new MeteoApisBaseurls(GETGeoInfoOM, GETGeoInfoOWM,GETForecastOM,GETForecastOWM);
 });
 
 
@@ -99,7 +101,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 
    options.ConfigurationOptions = config;
 
-    options.InstanceName = "weather";
+    options.InstanceName = "METEO-";
 
 
 });
@@ -110,11 +112,11 @@ builder.Services.AddHybridCache(opt =>
 
     opt.DefaultEntryOptions = new HybridCacheEntryOptions
     {
-        //Expiration = TimeSpan.FromMinutes(10),
-        //LocalCacheExpiration = TimeSpan.FromMinutes(5)
-        Expiration = TimeSpan.FromHours(3),
-        LocalCacheExpiration = TimeSpan.FromHours(1),
-         
+        Expiration = TimeSpan.FromSeconds(50),
+        LocalCacheExpiration = TimeSpan.FromSeconds(20)
+        //Expiration = TimeSpan.FromHours(3),
+        //LocalCacheExpiration = TimeSpan.FromHours(1),
+
     };
 })
 .AddSerializer<GeoinfoplusProvider,GeoinfoSerializer>()
@@ -186,7 +188,7 @@ mt.MapGet("/geocoding/{City}", async (
 
     
     var test = await _cache.GetOrCreateAsync(
-    $"-{cachedIdProviderKey}-{City.ToLower()}-{limit}",
+    $"{cachedIdProviderKey}-{City.ToLower()}-{limit}",
             async cancel => await request.GeoinfoModel(City, key),
             cancellationToken: ct
         );
@@ -278,7 +280,7 @@ mt.MapGet("/forecast", async (
 
 
     var result = await _cache.GetOrCreateAsync(
- $"-{cachedIdProviderKey}-{lat}-{lon}-{limit}",
+ $"{cachedIdProviderKey}-{lat}-{lon}-{limit}",
          async cancel => await request.Forecast(lat, lon, limit, key),
          cancellationToken: ct
      );

@@ -1,4 +1,5 @@
 ﻿using Shared.IMeteo;
+using Shared.MeteoData;
 using Shared.MeteoData.Models;
 using Shared.MeteoData.Models.Dto;
 using System.Text.Json;
@@ -7,27 +8,27 @@ using WeatherApi;
 
 namespace OpenWeathermapMain
 {
-    public class OpenWeathermap(IHttpClientFactory httpClientFactory) : IMeteoProvider
+    public class OpenWeathermap(IHttpClientFactory httpClientFactory, MeteoApisBaseurls testurls) : IMeteoProvider
     {
         private readonly HttpClient client = httpClientFactory.CreateClient();
-
+        private readonly MeteoApisBaseurls testurls1 = testurls;
 
 
         public async Task<GeoinfoplusProvider?> GeoinfoModel(string City, string key)
         {
 
 
-            var Request = await client.GetAsync($"https://api.openweathermap.org/geo/1.0/direct?q={City}&limit=3&appid={key}");
+            var Request = await client.GetAsync($"{testurls1.GETGeocodingOpenWeatherMap}/direct?q={City}&limit=3&appid={key}");
 
             var responseData = await Request.Content.ReadAsStringAsync();
 
-            var test = JsonSerializer.Deserialize(responseData, GeoinfolistSGmodel.Default.ListGeoinfoModel);
+            var DesData = JsonSerializer.Deserialize(responseData, GeoinfolistSGmodel.Default.ListGeoinfoModel);
 
 
             return new GeoinfoplusProvider
             {
                 MeteoProvider = MeteoService.OpenWeathermap.ToString(),
-                Geoinfo = test
+                Geoinfo = DesData
             };
 
 
@@ -39,7 +40,7 @@ namespace OpenWeathermapMain
 
         public async Task<ForecastDto> Forecast(double lat, double lon,int? limit, string? key)
         {
-            var Request = await client.GetAsync($"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={key}&units=metric");
+            var Request = await client.GetAsync($"{testurls1.GetForecastOpenWeatherMap}/forecast?lat={lat}&lon={lon}&appid={key}&units=metric");
 
             var responseData = await Request.Content.ReadAsStringAsync();
 

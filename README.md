@@ -1,4 +1,4 @@
-# Weather Forecast API plus console - in progress
+# Weather Forecast API plus console 
 
 
 
@@ -13,7 +13,7 @@
 - Minimal api
 - MeteoProviders : openweathermap & open-meteo
 - docker / compose 
-- xunit - wiremock  (todo)
+- xunit - wiremock  
 - standalone console Only project (todo)
 
 #

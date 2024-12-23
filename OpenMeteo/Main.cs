@@ -10,18 +10,10 @@ using System.Text.Json;
 
 namespace OpenMeteoMain;
 
-public class OpenMeteo : IMeteoProvider
+public class OpenMeteo(IHttpClientFactory httpClientFactory, MeteoApisBaseurls testurls) : IMeteoProvider
 {
-    private readonly HttpClient client;
-    private readonly Testurls testurls1;
-
-
-    public OpenMeteo(IHttpClientFactory httpClientFactory ,Testurls testurls)
-    {
-       client = httpClientFactory.CreateClient("DefaultClient");
-        testurls1 = testurls;
-       
-    }
+    private readonly HttpClient client = httpClientFactory.CreateClient();
+    private readonly MeteoApisBaseurls testurls1 = testurls;
 
     public async Task<GeoinfoplusProvider?> GeoinfoModel(string City, string key)
     {
@@ -68,7 +60,7 @@ public class OpenMeteo : IMeteoProvider
     public async Task<ForecastDto> Forecast(double lat, double lon,int? limit, string? key)
     {
 
-        var Request = await client.GetAsync($"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&hourly=temperature_2m,weather_code");
+        var Request = await client.GetAsync($"{testurls1.GETForecastOpenApi}/forecast?latitude={lat}&longitude={lon}&hourly=temperature_2m,weather_code");
 
         var RequestTostring = await Request.Content.ReadAsStringAsync();
 
