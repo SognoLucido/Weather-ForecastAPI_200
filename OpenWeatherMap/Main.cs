@@ -20,6 +20,8 @@ namespace OpenWeathermapMain
 
             var Request = await client.GetAsync($"{testurls1.GETGeocodingOpenWeatherMap}/direct?q={City}&limit=3&appid={key}");
 
+            if (!Request.IsSuccessStatusCode) return null;
+
             var responseData = await Request.Content.ReadAsStringAsync();
 
             var DesData = JsonSerializer.Deserialize(responseData, GeoinfolistSGmodel.Default.ListGeoinfoModel);
@@ -38,9 +40,11 @@ namespace OpenWeathermapMain
 
 
 
-        public async Task<ForecastDto> Forecast(double lat, double lon,int? limit, string? key)
+        public async Task<ForecastDto?> Forecast(double lat, double lon,int? limit, string? key)
         {
             var Request = await client.GetAsync($"{testurls1.GetForecastOpenWeatherMap}/forecast?lat={lat}&lon={lon}&appid={key}&units=metric");
+
+            if (!Request.IsSuccessStatusCode)return null;
 
             var responseData = await Request.Content.ReadAsStringAsync();
 

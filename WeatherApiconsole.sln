@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherApi.Integration.test
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{BDF916EE-4887-4706-B648-410F896991B9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OneshotMeteoConsoleAPP", "OneshotMeteoConsoleAPP\OneshotMeteoConsoleAPP.csproj", "{FE67B322-AC89-4FB3-A925-ACBF82B3AC17}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +55,10 @@ Global
 		{5DD24C79-810F-42DF-A66B-5079104FA775}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5DD24C79-810F-42DF-A66B-5079104FA775}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5DD24C79-810F-42DF-A66B-5079104FA775}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE67B322-AC89-4FB3-A925-ACBF82B3AC17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE67B322-AC89-4FB3-A925-ACBF82B3AC17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE67B322-AC89-4FB3-A925-ACBF82B3AC17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE67B322-AC89-4FB3-A925-ACBF82B3AC17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

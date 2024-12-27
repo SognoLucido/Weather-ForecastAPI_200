@@ -25,6 +25,8 @@ public class OpenMeteo(IHttpClientFactory httpClientFactory, MeteoApisBaseurls t
         //var Request = await client.GetAsync($"{testurls1.GETGeocodingOpenApi}/search?");
         var RequestTostring = await Request.Content.ReadAsStringAsync();
 
+        if (!Request.IsSuccessStatusCode) return null;
+
         var datamodel = JsonSerializer.Deserialize<GeoinfoOpenmeteoVariant?>(RequestTostring, GeoinfoOpenmeteoVariantSGmodel.Default.GeoinfoOpenmeteoVariant);
 
         if (datamodel.results is null) return null;
@@ -57,10 +59,12 @@ public class OpenMeteo(IHttpClientFactory httpClientFactory, MeteoApisBaseurls t
         return resposte;
     }
 
-    public async Task<ForecastDto> Forecast(double lat, double lon,int? limit, string? key)
+    public async Task<ForecastDto?> Forecast(double lat, double lon,int? limit, string? key)
     {
 
         var Request = await client.GetAsync($"{testurls1.GETForecastOpenApi}/forecast?latitude={lat}&longitude={lon}&hourly=temperature_2m,weather_code");
+
+        if (!Request.IsSuccessStatusCode) return null;
 
         var RequestTostring = await Request.Content.ReadAsStringAsync();
 
