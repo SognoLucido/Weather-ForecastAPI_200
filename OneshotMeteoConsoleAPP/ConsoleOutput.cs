@@ -60,7 +60,7 @@ namespace OneshotMeteoConsoleAPP
 
             while (true)
             {
-                Console.WriteLine("City name : ");
+                Console.Write("City name : ");
                 var input = Console.ReadLine();
 
                 if (!regex.IsMatch(input ?? ""))
@@ -73,7 +73,7 @@ namespace OneshotMeteoConsoleAPP
 
                 if (Data is null)
                 {
-                    Console.WriteLine("unable to fetch the geolocation,try again");
+                    Console.WriteLine("unable to fetch the geolocation");
                     continue;
                 }
 
@@ -131,7 +131,7 @@ namespace OneshotMeteoConsoleAPP
 
                 if (data is null)
                 {
-                    Console.WriteLine("unable to fetch the geolocation,try again");
+                    Console.WriteLine("unable to fetch the forecast");
                     continue;
                 }
 

@@ -25,7 +25,9 @@ public class OpenMeteo(IHttpClientFactory httpClientFactory, MeteoApisBaseurls t
         //var Request = await client.GetAsync($"{testurls1.GETGeocodingOpenApi}/search?");
         var RequestTostring = await Request.Content.ReadAsStringAsync();
 
-        if (!Request.IsSuccessStatusCode) return null;
+
+
+       if (!Request.IsSuccessStatusCode) return null;
 
         var datamodel = JsonSerializer.Deserialize<GeoinfoOpenmeteoVariant?>(RequestTostring, GeoinfoOpenmeteoVariantSGmodel.Default.GeoinfoOpenmeteoVariant);
 

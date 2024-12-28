@@ -42,7 +42,7 @@ namespace OneshotMeteoConsoleAPP
             Console.ReadLine();
 
 
-            IMeteoProvider? request = null;
+         
 
             HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
