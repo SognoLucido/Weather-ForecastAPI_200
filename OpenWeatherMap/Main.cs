@@ -2,6 +2,7 @@
 using Shared.MeteoData;
 using Shared.MeteoData.Models;
 using Shared.MeteoData.Models.Dto;
+using System.Net;
 using System.Text.Json;
 using WeatherApi;
 
@@ -44,7 +45,14 @@ namespace OpenWeathermapMain
         {
             var Request = await client.GetAsync($"{testurls1.GetForecastOpenWeatherMap}/forecast?lat={lat}&lon={lon}&appid={key}&units=metric");
 
-           // if (!Request.IsSuccessStatusCode)return null;
+
+            if(HttpStatusCode.Unauthorized == Request.StatusCode)
+            {
+                Console.WriteLine("Invalid Apikey // Unauthorized - Set a valid key in the appsettings.json file");
+                return null;
+            }
+            
+            if (!Request.IsSuccessStatusCode)return null;
 
             var responseData = await Request.Content.ReadAsStringAsync();
 

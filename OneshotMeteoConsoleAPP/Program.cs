@@ -39,6 +39,7 @@ namespace OneshotMeteoConsoleAPP
             Console.WriteLine($"You selected : {meteoService}");
             Console.WriteLine($"mode : {Modes}");
             Console.WriteLine("Press to continue");
+            Console.WriteLine();
             Console.ReadLine();
 
 
