@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using OpenMeteoMain;
 using OpenWeathermapMain;
 using Shared.IMeteo;
 using System.Text.RegularExpressions;
@@ -35,6 +36,9 @@ namespace OneshotMeteoConsoleAPP
                     case Mode.Forecast:
                         await Forecastlogic();
                         break;
+                    case Mode.All:
+                        await GeoplusForecast();
+                        break;
                     default: throw new NotImplementedException();
                 }
 
@@ -53,8 +57,26 @@ namespace OneshotMeteoConsoleAPP
 
 
 
+        private async Task GeoplusForecast()
+        {
+
+            var Geodata = await Geologic(true);
+
+            await Forecastlogic(Geodata);
+
+        }
+
+
+
         private async Task Geologic()
         {
+            await Geologic(false);
+        }
+
+        private async Task<(double,double,(string,string)?)?> Geologic(bool Enablereturn )
+        {
+
+          
 
             Regex regex = new("^[a-zA-Z]+$");
 
@@ -76,6 +98,13 @@ namespace OneshotMeteoConsoleAPP
                     Console.WriteLine("unable to fetch the geolocation");
                     continue;
                 }
+                else if (Enablereturn) 
+                {
+
+                    return (Data.Geoinfo[0].lat, Data.Geoinfo[0].lon, (
+                        meteo is OpenMeteo ? (Data.Geoinfo[0].name, Data.Geoinfo[0].country) : null
+                        ));
+                }
 
                 Console.WriteLine($"MeteoProvider :{Data.MeteoProvider}");
 
@@ -88,45 +117,55 @@ namespace OneshotMeteoConsoleAPP
             }
 
 
-
-
-
+            return null;
 
 
         }
 
 
 
-        private async Task Forecastlogic()
-        {
+        //private async Task Forecastlogic()
+        //{
+        //    await Forecastlogic(null);
+        //}
 
-            double lat, lon;
+        private async Task Forecastlogic((double, double, (string, string)?)? datax = null)
+        {
+           
+            double lat = 0, lon = 0;
+
+            if (datax is not null)
+            {
+                lat = datax.Value.Item1;
+                lon = datax.Value.Item2;
+            }
 
             for (; ; )
             {
-
-
-                while (true)
+                if (datax is null)
                 {
-                    Console.Write("Latitude : ");
-                    var input = Console.ReadLine();
 
-                    if (double.TryParse(input, out lat)) break;
-                    else Console.WriteLine("invalid input ,try again");
+                    while (true)
+                    {
+                        Console.Write("Latitude : ");
+                        var input = Console.ReadLine();
+
+                        if (double.TryParse(input, out lat)) break;
+                        else Console.WriteLine("invalid input ,try again");
 
 
+                    }
+
+                    while (true)
+                    {
+                        Console.Write("Longitude : ");
+                        var input = Console.ReadLine();
+
+                        if (double.TryParse(input, out lon)) break;
+                        else Console.WriteLine("invalid input ,try again");
+
+                    }
                 }
-
-                while (true)
-                {
-                    Console.Write("Longitude : ");
-                    var input = Console.ReadLine();
-
-                    if (double.TryParse(input, out lon)) break;
-                    else Console.WriteLine("invalid input ,try again");
-
-                }
-
                 var data = await meteo.Forecast(lat, lon, null, key);
 
                 if (data is null)
@@ -137,9 +176,18 @@ namespace OneshotMeteoConsoleAPP
 
                 Console.Clear();
 
+                //dont look here
+                if (datax is not null && meteo is OpenMeteo)
+                {
+                    data.City = datax.Value.Item3.Value.Item1;
+                    data.Country_code = datax.Value.Item3.Value.Item2;
+                }
+
+
                 Console.WriteLine("MeteoProvider : " +  data.MeteoProvider + " time : UTC" + " temp : C°");
 
                 if (meteo is OpenWeathermap) Console.Write($"City: {data.City} -  Country code: {data.Country_code} - ");
+                else if(meteo is OpenMeteo && datax is not null) Console.Write($"City: {data.City} -  Country code: {data.Country_code} - ");
 
                 Console.WriteLine($"lat: {data.lat} - lon: {data.lon}");
 
