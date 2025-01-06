@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenMeteoMain;
 using OpenWeathermapMain;
@@ -36,6 +37,9 @@ namespace OneshotMeteoConsoleAPP
             }
 
             Console.WriteLine();
+
+            if (meteoService == MeteoService.OpenWeathermap)
+                Console.WriteLine($"OWM require an Apikey : check/set in the appsettings.json file");
             Console.WriteLine($"You selected : {meteoService}");
             Console.WriteLine($"mode : {Modes}");
             Console.WriteLine("Press to continue");
@@ -119,7 +123,7 @@ namespace OneshotMeteoConsoleAPP
 
         static MeteoService? SelectMeteoservice()
         {
-            Console.WriteLine("Choose Meteo provider (OpenMeteo : OM , OpenweatherMap : OWM)");
+            Console.WriteLine("Choose Meteo provider (OpenMeteo : OM , OpenweatherMap(req apikey) : OWM)");
 
             var inputmeteoserv = Console.ReadLine();
 
