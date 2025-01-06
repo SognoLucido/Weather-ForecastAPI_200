@@ -1,6 +1,7 @@
 using HistoricalWeather;
 using HistoricalWeather.Sqlite;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing.Constraints;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -86,7 +87,7 @@ builder.Services.AddSingleton(opt =>
     return new MeteoApisBaseurls(GETGeoInfoOM, GETGeoInfoOWM,GETForecastOM,GETForecastOWM);
 });
 
-
+builder.Services.Configure<RouteOptions>(options => options.SetParameterPolicy<RegexInlineRouteConstraint>("regex"));
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
@@ -150,18 +151,16 @@ app.MapScalarApiReference(opt =>
 var mt = app.MapGroup("api").WithTags("MeteoAPIs");
 
 
-mt.MapGet("/geocoding/{City}", async (
+mt.MapGet("/geocoding/{City:regex(^[a-zA-Z]+$)}", async (
     string City,
     MeteoService meteoservice,
     HybridCache _cache,
     IConfiguration config,
     IServiceProvider provider,
-    CancellationToken ct,
-    [Range(1, 100)] int? limit = 3
-    ) =>
+    CancellationToken ct) =>
 {
-    if (limit <= 0) return Results.BadRequest("Limit must be greater than 0");
-    if (City == "{City}") return Results.BadRequest("Insert a City");
+    //if (limit <= 0) return Results.BadRequest("Limit must be greater than 0");
+    //if (City == "{City}") return Results.BadRequest("Insert a City");
 
     IMeteoProvider? request = null;
     string? key = null;
@@ -178,8 +177,8 @@ mt.MapGet("/geocoding/{City}", async (
                 cachedIdProviderKey = "OWM";
                 key = config.GetValue<string>("OpenweathermapApi:ApiKey");
 
-                if (key is null) return TypedResults.BadRequest("apikey Required check appsettings.json");
-
+                if (key is null)return TypedResults.BadRequest("apikey Required check appsettings.json");
+              
                 request = provider.GetKeyedService<IMeteoProvider>("openweatermap");
 
             }; break;
@@ -188,7 +187,7 @@ mt.MapGet("/geocoding/{City}", async (
 
     
     var test = await _cache.GetOrCreateAsync(
-    $"{cachedIdProviderKey}-{City.ToLower()}-{limit}",
+    $"{cachedIdProviderKey}-{City.ToLower()}",
             async cancel => await request.GeoinfoModel(City, key),
             cancellationToken: ct
         );
@@ -232,7 +231,7 @@ mt.MapGet("/geocoding/{City}", async (
 
 
 
-
+// limit 1 2 3 ,NO DAY FORECAST todo
 
 mt.MapGet("/forecast", async (
     double lat,
@@ -242,12 +241,12 @@ mt.MapGet("/forecast", async (
     IConfiguration config,
     IServiceProvider provider,
     CancellationToken ct,
-    int? limit
+    [Range(1,4)]int? Day = null
     ) =>
 {
    
 
-    if (limit <= 0) return Results.BadRequest("Limit must be greater than 0");
+    if (Day <= 0) return Results.BadRequest("Limit must be greater than 0");
 
     IMeteoProvider? request = null;
     string? key = null;
@@ -279,9 +278,10 @@ mt.MapGet("/forecast", async (
     lon = Math.Truncate(lon * 100) / 100;
 
 
+
     var result = await _cache.GetOrCreateAsync(
- $"{cachedIdProviderKey}-{lat}-{lon}-{limit}",
-         async cancel => await request.Forecast(lat, lon, limit, key),
+ $"{cachedIdProviderKey}-{lat}-{lon}-{Day}",
+         async cancel => await request!.Forecast(lat, lon, Day, key),
          cancellationToken: ct
      );
 
@@ -291,7 +291,7 @@ mt.MapGet("/forecast", async (
     return result is null ? Results.NotFound() : TypedResults.Ok(result);
 
 })
-    .WithDescription("Forecast for multiple days (limited based on MeteoService and subscription tier) requires latitude and longitude")
+    .WithDescription("Forecast (limited based on MeteoService and subscription tier) requires latitude and longitude. If 'day' is null, it fetches all days; otherwise, specify days 1, 2, or 3")
     .Produces<ForecastDto>(200)
     .Produces<string>(400)
     .Produces(404);
@@ -307,13 +307,13 @@ mt.MapGet("/oneshot/{City}", async (
     HybridCache _cache,
     IConfiguration config,
     IServiceProvider provider,
-    int? limit,
-    CancellationToken ct
+    CancellationToken ct,
+    [Range(1, 4)] int? Day = null
 
     ) =>
 {
 
-    if (limit <= 0) return Results.BadRequest("Limit must be greater than 0");
+    if (Day <= 0) return Results.BadRequest("Limit must be greater than 0");
 
     IMeteoProvider? request = null;
     string? key = null;
@@ -338,7 +338,7 @@ mt.MapGet("/oneshot/{City}", async (
     }
 
     var Geoinfo = await _cache.GetOrCreateAsync(
-   $"-{cachedIdProviderKey}-{City.ToLower()}-{limit}",
+   $"{cachedIdProviderKey}-{City.ToLower()}",
            async cancel => await request.GeoinfoModel(City, key),
            cancellationToken: ct
        );
@@ -354,8 +354,8 @@ mt.MapGet("/oneshot/{City}", async (
 
 
     var result = await _cache.GetOrCreateAsync(
-$"-{cachedIdProviderKey}-{lat}-{lon}-{limit}",
-        async cancel => await request.Forecast(lat, lon, limit, key),
+$"{cachedIdProviderKey}-{lat}-{lon}-{Day}",
+        async cancel => await request.Forecast(lat, lon, Day, key),
         cancellationToken: ct
     );
 
