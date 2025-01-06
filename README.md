@@ -14,7 +14,7 @@
 - MeteoProviders : openweathermap & open-meteo
 - docker / compose 
 - xunit - wiremock  
-- standalone console Only project (todo)
+- standalone console Only project <- check branches 'Consoleapp'
 
 #
 
